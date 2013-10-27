@@ -1,0 +1,5 @@
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_FILENAME} !(index|auth)\.php$
+RewriteCond %{REQUEST_FILENAME} !lib\/
+RewriteRule . /index.php [L]
