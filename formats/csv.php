@@ -36,7 +36,7 @@ class CSVFormat implements Format {
                 $lines[] = $line;
         }
         $format = $this->find_format($lines);
-        print_r($format);
+        //print_r($format);
         if( $format === false )
             return false;
         $i = count($lines);
