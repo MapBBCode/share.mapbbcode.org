@@ -54,7 +54,7 @@ function get_data( $codeid ) {
     if( !preg_match('/^[a-z]+$/', $codeid) )
         return;
 
-    $data = cache_fetch($codeid);
+    $data = cache_fetch($codeid, 'code');
     if( $data )
         return $data;
 
@@ -62,14 +62,14 @@ function get_data( $codeid ) {
     $res = $db->query('select editid, title, bbcode from '.DB_TABLE." where codeid = '$codeid'");
     $assoc = $res->num_rows > 0 ? $res->fetch_assoc() : false;
     $res->free();
-    cache_put($codeid, $assoc);
+    cache_put($codeid, 'code', $assoc);
     cache_purge(); // since we've accessed the db, why not purge the cache?
     return $assoc;
 }
 
 // find entry with gived id in cache
-function cache_fetch( $id ) {
-    $filename = 'cache/'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
+function cache_fetch( $id, $prefix ) {
+    $filename = 'cache/'.$prefix.'_'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
     $result = @file_get_contents($filename);
     if( $result !== false ) {
         $decoded = @unserialize($result);
@@ -80,19 +80,29 @@ function cache_fetch( $id ) {
 }
 
 // put entry into cache
-function cache_put( $id, $data ) {
+function cache_put( $id, $prefix, $data ) {
     if( !is_array($data) )
         return false;
-    $filename = 'cache/'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
+    $filename = 'cache/'.$prefix.'_'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
     @file_put_contents($filename, serialize($data));
 }
 
 // removes specific entry from cache
-function cache_remove( $id ) {
+function cache_remove( $id, $prefix ) {
     if( $id ) {
-        $idfile = 'cache/'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
+        $idfile = 'cache/'.$prefix.'_'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
         if( @is_file($idfile) ) {
             @unlink($idfile);
+        }
+    } elseif( $prefix ) {
+        // remove all entries with that prefix
+        $files = @scandir('cache');
+        if( $files !== false ) {
+            $p = $prefix.'_';
+            foreach( $files as $f ) {
+                if( substr($f, 0, strlen($p)) == $p )
+                    @unlink('cache/'.$p.$f);
+            }
         }
     }
 }
@@ -100,7 +110,8 @@ function cache_remove( $id ) {
 // removes old entries in cache
 function cache_purge() {
     $files = @scandir('cache');
-    if( $files !== false && count($files) > MAX_CACHED ) {
+    // note: we add a little threshold to not remove a file at a time
+    if( $files !== false && count($files) > MAX_CACHED + 50 ) {
         // sort by descending mtime
         $sorted = array();
         foreach($files as $f ) {

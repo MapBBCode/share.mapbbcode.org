@@ -203,7 +203,8 @@ function save( $title, $bbcode ) {
     if( $editid && $editid == $_POST['editid'] ) {
         // update
         $sql = "update ".DB_TABLE." set updated=now(), title='".$db->escape_string($title)."', bbcode='".$db->escape_string($bbcode)."' where codeid = '$codeid'";
-        cache_remove($codeid);
+        cache_remove($codeid, 'code');
+        cache_remove(false, 'user'); // yup, now a lot of users can have their libraries updated
     } else {
         $editid = generate_id(EDIT_HASH_LENGTH);
         $tries = 10;
@@ -251,12 +252,17 @@ function update_library( $userid, $codeid, $editid ) {
         $sql = 'update '.DB_TABLE."_users set editable=1 where userid='$uidesc' and codeid='$codeid'";
         $db->query($sql);
     }
+    cache_remove($userid, 'user');
 }
 
 // Returns as array of all library entries sorted by update time
 function fetch_library( $userid ) {
+    $stored = cache_fetch($userid, 'user');
+    if( $stored !== false )
+        return $stored;
+
     global $message;
-    $db = getdb(); // we cannot cache data since codes may change
+    $db = getdb();
     $codes = array();
     $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid = \''.$db->escape_string($userid).'\' order by m.updated desc limit 30';
     $res = $db->query($sql);
@@ -273,6 +279,7 @@ function fetch_library( $userid ) {
             $codes[] = $item;
         }
         $res->free();
+        cache_put($userid, 'user', $codes);
     } else
         $message = 'Failed to retrieve user library: '.$db->error;
     return $codes;
