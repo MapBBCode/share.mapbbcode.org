@@ -5,7 +5,6 @@ function getdb() {
     global $db;
     if( isset($db) )
         return $db;
-    echo 'Detabase init!<br>';
     $db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
     if( $db->connect_errno )
         die('Cannot connect to database: ('.$db->connect_errno.') '.$db->connect_error);
