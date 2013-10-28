@@ -1,13 +1,14 @@
 <?php
 require('config.php');
 require('convert.php');
+require('db.php');
 
 ini_set('session.gc_maxlifetime', 7776000);
 ini_set('session.cookie_lifetime', 7776000);
 session_set_cookie_params(7776000);
 session_start();
 
-//$userid = 'test';
+if( $_SERVER['HTTP_HOST'] == 'localhost' ) $userid = 'test';
 
 if( isset($_SERVER['REDIRECT_URL']) && preg_match('#^/?([a-zA-Z0-9_-]+)/?(?:/([a-z]+))?$/?#', $_SERVER['REDIRECT_URL'], $m) ) {
     $action = $m[1];
@@ -16,10 +17,6 @@ if( isset($_SERVER['REDIRECT_URL']) && preg_match('#^/?([a-zA-Z0-9_-]+)/?(?:/([a
     $action = '';
 }
 
-$db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
-if( $db->connect_errno )
-    die('Cannot connect to database: ('.$db->connect_errno.') '.$db->connect_error);
-$db->set_charset('utf8');
 if( isset($_SESSION['user_id']) )
     $userid = $_SESSION['user_id'];
 
@@ -73,21 +70,16 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
     elseif( $result == CONVERT_EMPTY )
         $message = 'Output file is empty';
 
-} elseif( $action == 'bookmark' && isset($userid) && isset($_POST['codeid']) && preg_match('/^\w+$/', $_POST['codeid']) ) {
-    $codeid = $_POST['codeid'];
-    $res = $db->query('select * from '.DB_TABLE." where codeid = '$codeid'");
-    $found = $res->num_rows > 0;
-    $res->free();
-    if( $found > 0 ) {
-        update_library($userid, $codeid, '');
+} elseif( $action == 'bookmark' && isset($userid) && isset($_POST['codeid']) ) {
+    if( get_data($_POST['codeid']) ) {
+        update_library($userid, $_POST['codeid'], '');
         $message = 'The code was added to your library';
     }
 
 } elseif( strlen($action) == HASH_LENGTH || strlen($action) == 4 ) { // 4 is legacy, todo remove after Nov 30
     // find $action in the table
-    $res = $db->query('select * from '.DB_TABLE." where codeid = '$action'");
-    if( $res->num_rows > 0 ) {
-        $data = $res->fetch_assoc();
+    $data = get_data($action);
+    if( $data ) {
         $bbcode = $data['bbcode'];
         $title = $data['title'];
         $scodeid = $action;
@@ -106,9 +98,15 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
                 update_library($userid, $scodeid, $seditid);
         }
         $readpost = false;
-    } else
+    } else {
+        if( $api )
+            return_json(array('error' => 'No such code: '.$action));
         $message = 'There is no code in the database with given id';
-    $res->free();
+    }
+
+} elseif( strlen($action) > 0 && $api ) {
+    // very incorrect id
+    return_json(array('error' => 'Incorrect code: '.$action));
 
 } elseif( isset($_GET['gz']) && strlen($_GET['gz']) > 12 ) {
     // action is base64-encoded bbcode+title
@@ -164,42 +162,6 @@ require('page.php');
 
 // ---------------------------------- FUNCTIONS ----------------------------
 
-// create tables if they do not exist
-function initdb() {
-    global $db, $message;
-    $table = DB_TABLE;
-    $res = $db->query("show tables like '$table'");
-    if( $res->num_rows < 1 ) {
-        $sql = <<<CSQL
-CREATE TABLE $table (
-    codeid varchar(10) not null primary key,
-    editid varchar(10) not null,
-    title varchar(250) not null,
-    created datetime not null,
-    updated datetime not null,
-    bbcode text not null
-) DEFAULT CHARACTER SET utf8
-CSQL;
-        $res = $db->query($sql);
-        if( $res ) {
-            $table = DB_TABLE.'_users';
-            $sql = <<<CSQL2
-CREATE TABLE $table (
-    codeid varchar(10) not null,
-    userid varchar(250) not null,
-    editable tinyint(1) not null
-) DEFAULT CHARACTER SET utf8
-CSQL2;
-            $res = $db->query($sql);
-        }
-        if( !$res )
-            $message = 'Failed to create table '.$table.': '.$db->error;
-        else
-            $message = 'Tables have been created successfully';
-    } else
-        $message = "Table '$table' already exists";
-}
-
 // print data as json(p) and exit
 function return_json( $data ) {
     header('Access-Control-Allow-Origin: *');
@@ -214,7 +176,15 @@ function return_json( $data ) {
 
 // save bbcode to database (or update)
 function save( $title, $bbcode ) {
-    global $db, $message, $api;
+    global $message, $api;
+
+    if( strlen($title) < 3 && strlen($bbcode) < 7 ) {
+        if( $api )
+            return_json(array('error' => 'Would not save empty data, sorry'));
+        else
+            $message = 'Would not save empty data, sorry';
+        return;
+    }
 
     if( strlen($title) > 250 ) {
         $spacepos = strrpos($title, ' ');
@@ -222,7 +192,15 @@ function save( $title, $bbcode ) {
     }
 
     $codeid = isset($_POST['codeid']) && isset($_POST['editid']) ? $_POST['codeid'] : '';
-    $editid = get_edit_id($_POST['codeid']);
+    $editid = false;
+    if( isset($_POST['codeid']) && strlen($_POST['codeid']) == HASH_LENGTH && preg_match('/^[a-z]+$/', $_POST['codeid']) ) {
+        $data = get_data($_POST['codeid']);
+        if( $data )
+            $editid = $data['editid'];
+    }
+
+    $db = getdb();
+    purge_cache($codeid);
     if( $editid && $editid == $_POST['editid'] ) {
         // update
         $sql = "update ".DB_TABLE." set updated=now(), title='".$db->escape_string($title)."', bbcode='".$db->escape_string($bbcode)."' where codeid = '$codeid'";
@@ -231,9 +209,7 @@ function save( $title, $bbcode ) {
         $tries = 10;
         do {
             $codeid = generate_id(HASH_LENGTH);
-            $res = $db->query("select codeid from ".DB_TABLE." where codeid = '$codeid'");
-            $exists = $res->num_rows > 0;
-            $res->free();
+            $exists = get_data($codeid) !== false;
         } while( $exists );
         $sql = "insert into ".DB_TABLE." (created, updated, codeid, editid, title, bbcode) values(now(), now(), '$codeid', '$editid', '".$db->escape_string($title)."', '".$db->escape_string($bbcode)."')";
     }
@@ -248,9 +224,9 @@ function save( $title, $bbcode ) {
         }
     } else {
         if( !$res ) {
-            $message = 'Failed to insert entry in the database: '.$db->error;
+            return_json(array('error' => 'Failed to insert entry in the database: '.$db->error));
         } else {
-            header("Location: http://".$_SERVER['HTTP_HOST']."/$codeid/$editid");
+            return_json(array('codeid' => $codeid, 'editid' => $editid, 'viewurl' => "http://".$_SERVER['HTTP_HOST']."/$codeid", 'editurl' => "http://".$_SERVER['HTTP_HOST']."/$codeid/$editid"));
         }
         exit;
     }
@@ -258,7 +234,7 @@ function save( $title, $bbcode ) {
 
 // Adds code id to the user's library. Edit id is checked to test if user can edit code
 function update_library( $userid, $codeid, $editid ) {
-    global $db;
+    $db = getdb();
     $uidesc = $db->escape_string($userid);
     $sql = 'select editable from '.DB_TABLE."_users where codeid = '$codeid' and userid = '$uidesc'";
     $res = $db->query($sql);
@@ -279,7 +255,8 @@ function update_library( $userid, $codeid, $editid ) {
 
 // Returns as array of all library entries sorted by update time
 function fetch_library( $userid ) {
-    global $db, $message;
+    global $message;
+    $db = getdb();
     $codes = array();
     $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid = \''.$db->escape_string($userid).'\' order by m.updated desc';
     $res = $db->query($sql);
@@ -307,21 +284,6 @@ function generate_id($length) {
     for( $i = 0; $i < $length; $i++ )
         $id .= chr(mt_rand(97, 122)); // 'a'..'z'
     return $id;
-}
-
-// Returns edit id for given code id, or false if code id is incorrect
-function get_edit_id($codeid) {
-    global $db;
-    if( strlen($codeid) != HASH_LENGTH || !preg_match('/^[a-z]+$/', $codeid) )
-        return false;
-    $res = $db->query('select editid from '.DB_TABLE." where codeid = '$codeid'");
-    if( $res->num_rows > 0 ) {
-        $tmp = $res->fetch_row();
-        $editid = $tmp[0];
-    } else
-        $editid = false;
-    $res->free();
-    return $editid;
 }
 
 // Arhives bbcode and title
