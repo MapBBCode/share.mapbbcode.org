@@ -5,6 +5,7 @@ function getdb() {
     global $db;
     if( isset($db) )
         return $db;
+    echo 'Detabase init!<br>';
     $db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
     if( $db->connect_errno )
         die('Cannot connect to database: ('.$db->connect_errno.') '.$db->connect_error);
@@ -54,16 +55,68 @@ function get_data( $codeid ) {
     if( !preg_match('/^[a-z]+$/', $codeid) )
         return;
 
-    // todo: caching
+    $data = cache_fetch($codeid);
+    if( $data )
+        return $data;
+
     $db = getdb();
     $res = $db->query('select editid, title, bbcode from '.DB_TABLE." where codeid = '$codeid'");
     $assoc = $res->num_rows > 0 ? $res->fetch_assoc() : false;
     $res->free();
+    cache_put($codeid, $assoc);
+    cache_purge(); // since we've accessed the db, why not purge the cache?
     return $assoc;
 }
 
-// removes old entries in cache and an entry for $codeid if specified
-function purge_cache( $codeid ) {
+// find entry with gived id in cache
+function cache_fetch( $id ) {
+    $filename = 'cache/'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
+    $result = @file_get_contents($filename);
+    if( $result !== false ) {
+        $decoded = @unserialize($result);
+        if( is_array($decoded) )
+            return $decoded;
+    }
+    return false;
+}
+
+// put entry into cache
+function cache_put( $id, $data ) {
+    if( !is_array($data) )
+        return false;
+    $filename = 'cache/'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
+    @file_put_contents($filename, serialize($data));
+}
+
+// removes specific entry from cache
+function cache_remove( $id ) {
+    if( $id ) {
+        $idfile = 'cache/'.preg_replace('/[^a-z0-9_-]/', '', strtolower($id));
+        if( @is_file($idfile) ) {
+            @unlink($idfile);
+        }
+    }
+}
+
+// removes old entries in cache
+function cache_purge() {
+    $files = @scandir('cache');
+    if( $files !== false && count($files) > MAX_CACHED ) {
+        // sort by descending mtime
+        $sorted = array();
+        foreach($files as $f ) {
+            $filename = 'cache/'.$f;
+            if( @is_file($filename) ) {
+                $sorted[filemtime($filename)] = $filename;
+            }
+        }
+        krsort($sorted);
+        $i = 0;
+        foreach( $sorted as $t => $filename ) {
+            if( $i++ >= MAX_CACHED )
+                @unlink($filename);
+        }
+    }
 }
 
 ?>

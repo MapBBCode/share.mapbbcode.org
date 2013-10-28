@@ -8,7 +8,7 @@ ini_set('session.cookie_lifetime', 7776000);
 session_set_cookie_params(7776000);
 session_start();
 
-if( $_SERVER['HTTP_HOST'] == 'localhost' ) $userid = 'test';
+//if( $_SERVER['HTTP_HOST'] == 'localhost' ) $userid = 'test';
 
 if( isset($_SERVER['REDIRECT_URL']) && preg_match('#^/?([a-zA-Z0-9_-]+)/?(?:/([a-z]+))?$/?#', $_SERVER['REDIRECT_URL'], $m) ) {
     $action = $m[1];
@@ -200,10 +200,10 @@ function save( $title, $bbcode ) {
     }
 
     $db = getdb();
-    purge_cache($codeid);
     if( $editid && $editid == $_POST['editid'] ) {
         // update
         $sql = "update ".DB_TABLE." set updated=now(), title='".$db->escape_string($title)."', bbcode='".$db->escape_string($bbcode)."' where codeid = '$codeid'";
+        cache_remove($codeid);
     } else {
         $editid = generate_id(EDIT_HASH_LENGTH);
         $tries = 10;
@@ -256,9 +256,9 @@ function update_library( $userid, $codeid, $editid ) {
 // Returns as array of all library entries sorted by update time
 function fetch_library( $userid ) {
     global $message;
-    $db = getdb();
+    $db = getdb(); // we cannot cache data since codes may change
     $codes = array();
-    $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid = \''.$db->escape_string($userid).'\' order by m.updated desc';
+    $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid = \''.$db->escape_string($userid).'\' order by m.updated desc limit 30';
     $res = $db->query($sql);
     if( $res ) {
         require_once('mapbbcode.php');
@@ -338,12 +338,13 @@ function human_date($sqldate, $sqlnow = false) {
     if( $curday - $day == 1 ) return 'yesterday';
     // if( $curday - $day == 2 ) return 'two days ago';
     // now output real dates
-    $months = array('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    //$months = array('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    $months = array('', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', '');
     $month = $months[(int)idate('m', $date)];
-    if( idate('Y', $now) == idate('Y', $date) )
+    if( date('Y', $now) == date('Y', $date) )
         return $month.' '.idate('d', $date);
     else
-        return $month.' '.idate('Y', $date);
+        return $month.' '.date('Y', $date);
 }
 
 ?>
