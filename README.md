@@ -36,4 +36,4 @@ Writing the service would be much harder it it weren't for those libraries:
 
 ## License
 
-All files except that did not come from other libraries are released under [WTFPL](http://www.wtfpl.net/).
+All files that did not come from other libraries are released under [WTFPL](http://www.wtfpl.net/).
