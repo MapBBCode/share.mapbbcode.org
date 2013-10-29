@@ -30,6 +30,8 @@
         padding: 6px 16px;
         color: black;
         text-align: center;
+        border: none;
+        z-index: 3000;
     }
     #title {
         position: absolute;
