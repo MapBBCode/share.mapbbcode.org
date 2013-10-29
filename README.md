@@ -27,6 +27,7 @@ Writing the service would be much harder it it weren't for those libraries:
 
 * [MapBBCode](https://github.com/mapbbcode/mapbbcode) (WTFPL)
 * [Leaflet](http://leafletjs.com/) (BSD 2-clause)
+* [Leaflet.draw](https://github.com/Leaflet/Leaflet.draw) (MIT)
 * [Bing.js](https://github.com/shramov/leaflet-plugins/blob/master/layer/tile/Bing.js) (BSD 2-clause)
 * [LightOpenID](http://code.google.com/p/lightopenid/) (MIT)
 * [OpenID Selector](http://code.google.com/p/openid-selector/) (BSD 3-clause)
