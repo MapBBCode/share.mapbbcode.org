@@ -222,18 +222,18 @@ var bbcode = '<?=screen_param($bbcode) ?>';
 createHistoryBox();
 
 var mapBB = new MapBBCode({
-    defaultPosition: [59.95, 30.3],
-    defaultZoom: 7,
+    defaultPosition: [55, 19],
+    defaultZoom: 5,
     maxInitialZoom: 16,
     editorHeight: 0,
     fullViewHeight: 0,
     fullFromStart: true,
     editorCloseButtons: false,
     preferStandardLayerSwitcher: false,
-    leafletOptions: { scrollWheelZoom: true },
+    leafletOptions: { scrollWheelZoom: true, minZoom: 3, maxZoom: 18 },
     createLayers: function(L) { return [
-        L.tileLayer('http://129.206.74.245:8001/tms_r.ashx?x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 19 }),
-        'OSM',
+        L.tileLayer('http://129.206.74.245:8001/tms_r.ashx?x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 18 }),
+        MapBBCode.prototype.createOpenStreetMapLayer(),
         new L.BingLayer('Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU', { name: 'Bing Satellite' })
     ]}
 });
