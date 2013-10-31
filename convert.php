@@ -81,7 +81,7 @@ function export( $type, $title, $bbcode, $codeid = '', $break_on_empty = true ) 
 function compare_formats( $fmta, $fmtb ) {
     $pa = isset($fmta->priority) ? $fmta->priority : 0;
     $pb = isset($fmtb->priority) ? $fmtb->priority : 0;
-    return $pa < $pb ? -1 : ($pa == $pb ? 0 : 1);
+    return $pa < $pb ? 1 : ($pa == $pb ? 0 : -1);
 }
 
 // determines format for given file header

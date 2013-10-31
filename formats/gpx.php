@@ -35,7 +35,7 @@ class GPXFormat implements Format {
     }
 
     public function test( $header ) {
-        return strpos($header, '<gpx ') !== false && strpos($header, '/GPX/1') !== false;
+        return strpos($header, '<gpx') !== false && strpos($header, '/GPX/1') !== false;
     }
 
     public function import( $file ) {

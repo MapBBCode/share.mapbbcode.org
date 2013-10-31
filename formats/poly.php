@@ -26,7 +26,7 @@ class PolyFormat implements Format {
     }
 
     public function test( $header ) {
-        return preg_match('/^.+?[\r\n]+!?\d+[\r\n]\s*-?\d/s', $header); // very loose, yes
+        return preg_match('/^[^\n\r]+?[\r\n]+!?\d+[\r\n]\s*-?\d/s', $header); // very loose, yes
     }
 
     public function import( $file ) {
