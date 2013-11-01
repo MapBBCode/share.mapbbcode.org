@@ -92,10 +92,12 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
         } else {
             $newcode = false;
             $seditid = $aparam;
-            $message = '<a href="/'.$action.'" target="mapbbstatic">Link to static version</a>. Bookmark this page to alter the bbcode later';
+            $message = '<b><a href="/'.$action.'" target="mapbbstatic">Link for sharing</a></b>. Bookmark this page to alter the map later';
             $nohide = 1; // do not hide message
-            if( isset($userid) )
+            if( isset($userid) ) {
                 update_library($userid, $scodeid, $seditid);
+                $message .= ' (or check the library)';
+            }
         }
         $readpost = false;
     } else {

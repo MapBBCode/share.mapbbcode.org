@@ -3,6 +3,7 @@
 <head>
 <title><?=isset($title) && strlen($title) > 0 ? htmlspecialchars($title).' — ' : (isset($scodeid) && strlen($scodeid) > 0 ? $scodeid.' — ' : '') ?>MapBBCode Share</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<?php if( isset($seditid) ) { ?><meta name="robots" content="noindex, nofollow"><?php } ?>
 <link rel="stylesheet" href="/lib/leaflet.css" />
 <link rel="stylesheet" href="/lib/leaflet.draw.css" />
 <!--[if lte IE 8]>
@@ -233,8 +234,9 @@ var mapBB = new MapBBCode({
     leafletOptions: { scrollWheelZoom: true, minZoom: 3, maxZoom: 18 },
     createLayers: function(L) { return [
         L.tileLayer('http://129.206.74.245:8001/tms_r.ashx?x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 18 }),
+        L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', { name: 'CycleMap', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://www.opencyclemap.org\">OpenCycleMap</a>', minZoom: 0, maxZoom: 18 }),
         MapBBCode.prototype.createOpenStreetMapLayer(),
-        new L.BingLayer('Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU', { name: 'Bing Satellite' })
+        new L.BingLayer('AjO5XVNDp_3dZ1fa3MQs4lsJQP7MCYrHFxXFvi0yHCxpfNW1EaFZ_Ik5HecRHdSi', { name: 'Bing Satellite' })
     ]}
 });
 mapBB.setStrings({ helpContents: [
@@ -246,7 +248,7 @@ mapBB.setStrings({ helpContents: [
     'The author\'s goal is to spread the [map] bbcode as wide as possible, integrating it into all major CMS and forum engines, like WordPress, vBulletin and MediaWiki. Let\'s make drawing and sharing maps as easy as sharing images and code! To learn more about MapBBCode library and applications using it, visit <a href="http://mapbbcode.org/" target="mapbb">mapbbcode.org</a>.',
     '# Is it secret? Is it safe?',
     'Maps you save do not appear in any directories and are almost impossible to find without you sharing a link (be careful not to lose links to important maps). When you sign in, your identifier is hashed before storing to the database, so even the site administrator would not know you are making maps. The data you create here is yours and has a license of your choosing: we don\'t impose any rules on its openness or visibility.',
-    'The site was created by Ilya Zverev. <a href="https://github.com/MapBBCode/share.mapbbcode.org" target="mapbb">MapBBCode Share</a> version 1.0.'
+    'The site was created by Ilya Zverev. <a href="https://github.com/MapBBCode/share.mapbbcode.org" target="mapbb">MapBBCode Share</a> version 1.0-1.'
 ]});
 
 <?php if( $editing ): ?>
