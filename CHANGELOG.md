@@ -4,7 +4,7 @@ Versions are numbered `N.M.L-S`, where `N.M.L` is the MapBBCode library version,
 
 ### 1.0.1-2, master
 
-* Empty CSV now doesn't have a header to not confuse users.
+* Empty CSV now doesn't have a header to not confuse users; single path is saved as csv.
 
 ### 1.0.0-1, 2013-11-01
 
