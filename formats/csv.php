@@ -6,7 +6,7 @@ class CSVFormat implements Format {
     public $priority = -10; // last
 
     public function export( $data ) {
-        $out = "latitude,longitude,description\n";
+		$out = '';
         foreach( $data['objs'] as $obj ) {
             if( count($obj['coords']) == 1 ) {
                 $coord = $obj['coords'][0];
@@ -14,9 +14,10 @@ class CSVFormat implements Format {
                 if( isset($obj['text']) ) {
                     $out .= '"'.str_replace('"', '""', $obj['text']).'"';
                 }
-                $out .= "\n";
+				$out .= "\n";
             }
         }
+        $out = strlen($out) > 0 ? "latitude,longitude,description\n".$out : '';
         return $out;
     }
 
