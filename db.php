@@ -5,10 +5,14 @@ function getdb() {
     global $db;
     if( isset($db) )
         return $db;
-    $db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
-    if( $db->connect_errno )
-        die('Cannot connect to database: ('.$db->connect_errno.') '.$db->connect_error);
-    $db->set_charset('utf8');
+    if( strlen(DB_DATABASE) == 0 )
+        $db = false;
+    else {
+        $db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
+        if( $db->connect_errno )
+            die('Cannot connect to database: ('.$db->connect_errno.') '.$db->connect_error);
+        $db->set_charset('utf8');
+    }
     return $db;
 }
 
@@ -16,6 +20,10 @@ function getdb() {
 function initdb() {
     global $message;
     $db = getdb();
+    if( !$db ) {
+        $message = 'Please specify database in the config.php';
+        return;
+    }
     $table = DB_TABLE;
     $res = $db->query("show tables like '$table'");
     if( $res->num_rows < 1 ) {
@@ -59,6 +67,8 @@ function get_data( $codeid ) {
         return $data;
 
     $db = getdb();
+    if( !$db )
+        return false;
     $res = $db->query('select editid, title, bbcode from '.DB_TABLE." where codeid = '$codeid'");
     $assoc = $res->num_rows > 0 ? $res->fetch_assoc() : false;
     $res->free();

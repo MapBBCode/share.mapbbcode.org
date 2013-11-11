@@ -206,7 +206,7 @@ function save( $title, $bbcode ) {
     $db = getdb();
     if( $editid && $editid == $_POST['editid'] ) {
         // update
-        $sql = "update ".DB_TABLE." set updated=now(), title='".$db->escape_string($title)."', bbcode='".$db->escape_string($bbcode)."' where codeid = '$codeid'";
+        $sql = !$db ? '' : "update ".DB_TABLE." set updated=now(), title='".$db->escape_string($title)."', bbcode='".$db->escape_string($bbcode)."' where codeid = '$codeid'";
         cache_remove($codeid, 'code');
         cache_remove(false, 'user'); // yup, now a lot of users can have their libraries updated
     } else {
@@ -216,10 +216,17 @@ function save( $title, $bbcode ) {
             $codeid = generate_id(HASH_LENGTH);
             $exists = get_data($codeid) !== false;
         } while( $exists );
-        $sql = "insert into ".DB_TABLE." (created, updated, codeid, editid, title, bbcode) values(now(), now(), '$codeid', '$editid', '".$db->escape_string($title)."', '".$db->escape_string($bbcode)."')";
+        $sql = !$db ? '' : "insert into ".DB_TABLE." (created, updated, codeid, editid, title, bbcode) values(now(), now(), '$codeid', '$editid', '".$db->escape_string($title)."', '".$db->escape_string($bbcode)."')";
     }
 
-    $res = $db->query($sql);
+	if( $db ) {
+		$res = $db->query($sql);
+	} else {
+		// put code to cache
+		$assoc = array('editid' => $editid, 'title' => $title, 'bbcode' => $bbcode);
+		cache_put($codeid, 'code', $assoc);
+		$res = true;
+	}
     if( !$api ) {
         if( !$res ) {
             $message = 'Failed to insert entry in the database: '.$db->error;
@@ -240,6 +247,8 @@ function save( $title, $bbcode ) {
 // Adds code id to the user's library. Edit id is checked to test if user can edit code
 function update_library( $userid, $codeid, $editid ) {
     $db = getdb();
+    if( !$db )
+        return;
     $uidesc = $db->escape_string($userid);
     $sql = 'select editable from '.DB_TABLE."_users where codeid = '$codeid' and userid = '$uidesc'";
     $res = $db->query($sql);
@@ -266,8 +275,10 @@ function fetch_library( $userid ) {
         return $stored;
 
     global $message;
-    $db = getdb();
     $codes = array();
+    $db = getdb();
+    if( !$db )
+        return $codes;
     $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid = \''.$db->escape_string($userid).'\' order by m.updated desc limit 30';
     $res = $db->query($sql);
     if( $res ) {
