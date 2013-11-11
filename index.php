@@ -123,7 +123,9 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
     // title and bbcode parameters
     $title = isset($_GET['title']) ? $_GET['title'] : '';
     if( isset($_GET['bbcode']) ) {
-        $bbcode = $_GET['bbcode'];
+        $bbcode = trim($_GET['bbcode']);
+        if( substr($bbcode, 0, 4) != '[map' && substr($bbcode, -6) != '[/map]' )
+            $bbcode = '[map]'.$bbcode.'[/map]';
         $editing = false;
     }
 }
