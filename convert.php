@@ -123,12 +123,14 @@ function import( $filename ) {
             fclose($handle);
     }
 
+    $old_bbcode = defined('IMPORT_SINGLE') && !IMPORT_SINGLE && isset($_POST['bbcode']) ? $_POST['bbcode'] : '';
+    $old_title = defined('IMPORT_SINGLE') && !IMPORT_SINGLE && isset($_POST['title']) ? $_POST['title'] : '';
     if( $data ) {
-        $title = isset($data['title']) ? $data['title'] : '';
-        $bbcode = array_to_mapbbcode($data);
+        $title = strlen($old_title) > 0 ? $old_title : (isset($data['title']) ? $data['title'] : '');
+        $bbcode = merge_mapbbcode(array_to_mapbbcode($data), $old_bbcode);
         return array($title, $bbcode);
     }
-    return array('', '');
+    return array($old_title, $old_bbcode);
 }
 
 // simplifies paths in the array

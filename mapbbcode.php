@@ -7,7 +7,6 @@ function get_mapbbcode_regexp() {
     $re['mapel'] = $re['coord'].'(?:'.$re['coord'].')*(?:\\s*'.$re['params'].')?';
     $re['maptag'] = '\\[map(?:=([12]?\\d)(?:,'.$re['coord'].')?)?\\]';
     $re['map'] = $re['maptag'].'('.$re['mapel'].'(?:\\s*;'.$re['mapel'].')*)?\\s*\\[\\/map\\]';
-//    $re['map'] = $re['maptag'].'\\[/map\\]';
     return $re;
 }
 
@@ -130,6 +129,17 @@ function array_to_mapbbcode( $data ) {
 
 function latlng_to_string( $latlng ) {
     return number_format($latlng[0], 5, '.', '').','.number_format($latlng[1], 5, '.', '');
+}
+
+function merge_mapbbcode( $bbcode1, $bbcode2 ) {
+    $re = get_mapbbcode_regexp();
+    if( !preg_match('/'.$re['map'].'/', $bbcode1, $m1) )
+        return $bbcode2;
+    if( !preg_match('/'.$re['map'].'/', $bbcode2, $m2) )
+        return $bbcode1;
+    $bb1 = count($m1) > 4 ? $m1[4] : '';
+    $bb2 = count($m2) > 4 ? ';'.$m2[4] : '';
+    return '[map]'.$bb1.$bb2.'[/map]';
 }
 
 ?>

@@ -5,7 +5,8 @@ Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and
 ### 1.1-2, master
 
 * Updated MapBBCode to version 1.1.
-* Ability to work without a database.
+* Merge imported traces with existing data. [#2](https://github.com/MapBBCode/share.mapbbcode.org/issues/2)
+* Ability to work without a database. [#3](https://github.com/MapBBCode/share.mapbbcode.org/issues/3)
 * Moved Bing key to a configuration file.
 * BBCode tags can be omitted in `?bbcode=` parameter.
 * Empty CSV now doesn't have a header to not confuse users; single path is saved as csv.

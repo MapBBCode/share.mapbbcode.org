@@ -11,6 +11,7 @@
     const EDIT_HASH_LENGTH = 5; // hash for editing
     const MAX_IMPORT_NODES = 200; // nodes in imported gps traces
     const MAX_TOTAL_NODES = 1000; // total nodes in all imported gps traces
+    const IMPORT_SINGLE = false; // clear map on import
 
     // set this to your timezone or whatever (doesn't really matter)
     date_default_timezone_set('UTC');
