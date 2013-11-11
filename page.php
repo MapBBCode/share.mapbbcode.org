@@ -236,7 +236,7 @@ var mapBB = new MapBBCode({
         L.tileLayer('http://129.206.74.245:8001/tms_r.ashx?x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 18 }),
         L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', { name: 'CycleMap', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://www.opencyclemap.org\">OpenCycleMap</a>', minZoom: 0, maxZoom: 18 }),
         MapBBCode.prototype.createOpenStreetMapLayer(),
-        new L.BingLayer('AjO5XVNDp_3dZ1fa3MQs4lsJQP7MCYrHFxXFvi0yHCxpfNW1EaFZ_Ik5HecRHdSi', { name: 'Bing Satellite' })
+        new L.BingLayer('<?=BING_KEY ?>', { name: 'Bing Satellite' })
     ]}
 });
 mapBB.setStrings({ helpContents: [
