@@ -236,7 +236,7 @@ var mapBB = new MapBBCode({
         L.tileLayer('http://129.206.74.245:8001/tms_r.ashx?x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 18 }),
         L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', { name: 'CycleMap', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://www.opencyclemap.org\">OpenCycleMap</a>', minZoom: 0, maxZoom: 18 }),
         MapBBCode.prototype.createOpenStreetMapLayer()
-		<?php if(defined('BING_KEY') && strlen(BING_KEY) > 0 ) { ?>, new L.BingLayer('<?=BING_KEY ?>', { name: 'Bing Satellite' })<?php } ?>
+        <?php if(defined('BING_KEY') && strlen(BING_KEY) > 0 ) { ?>, new L.BingLayer('<?=BING_KEY ?>', { name: 'Bing Satellite' })<?php } ?>
     ]}
 });
 mapBB.setStrings({ helpContents: [
@@ -285,15 +285,38 @@ addLogin(show);
 <?php endif; ?>
 
 function openEditor( bbcode ) {
+    var modifyListener = {
+        saveButtonStyle: false,
+        modified: function() {
+            if( this.saveButtonStyle ) {
+                this.saveButtonStyle.backgroundColor = '#fee';
+                this.saveButtonStyle.fontWeight = 'bold';
+            }
+        },
+
+        reKeys: new RegExp('a^'),
+        applicableTo: function() { return true; },
+        objectToLayer: function() {},
+        layerToObject: function() {},
+
+        // install change listener
+        createEditorPanel: function( layer ) {
+            layer.on('edit remove', this.modified, this);
+        }
+    };
+    window.MapBBCode.objectParams.push(modifyListener);
+
     document.getElementById('titleview').style.display = 'none';
     document.getElementById('titleedit').style.display = 'block';
     document.getElementById('title').style.display = 'block';
     var edit = mapBB.editor('mapedit', bbcode);
-    var save = L.functionButton('Save', { position: 'topleft' });
+    var save = L.functionButton('<span style="font-size: 12pt;">Save</span>', { position: 'topleft', bgColor: '#fdd' });
     save.on('clicked', function() {
         submit('save', edit);
     });
     edit.map.addControl(save);
+    modifyListener.saveButtonStyle = save._links[0].style;
+    edit.map.on('draw:created', modifyListener.modified, modifyListener);
     var editbb = L.functionButton('Edit Raw', { position: 'topleft' });
     editbb.on('clicked', function() {
         openCodeEditor(edit);
