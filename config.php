@@ -2,7 +2,7 @@
     const DB_HOST = 'localhost';
     const DB_USER = '';
     const DB_PASSWORD = '';
-    const DB_DATABASE = '';
+    const DB_DATABASE = ''; // if empty, db is not used (increase MAX_CACHED then)
     const DB_TABLE = 'sharemap'; // for other tables this is the prefix
     const NEED_INIT_DB = true; // set to false after calling /initdb
     const BING_KEY = '' // put your bing imagery key here
