@@ -35,6 +35,9 @@
         border: none;
         z-index: 3000;
     }
+    #message a {
+        color: blue;
+    }
     #title {
         position: absolute;
         width: 500px;
@@ -234,8 +237,8 @@ var mapBB = new MapBBCode({
     preferStandardLayerSwitcher: false,
     leafletOptions: { scrollWheelZoom: true, minZoom: 3, maxZoom: 18 },
     createLayers: function(L) { return [
-        L.tileLayer('http://129.206.74.245:8001/tms_r.ashx?x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 18 }),
-        L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', { name: 'CycleMap', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OSM</a> | Tiles &copy; <a href=\"http://www.opencyclemap.org\">OpenCycleMap</a>', minZoom: 0, maxZoom: 18 }),
+        L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 18 }),
+        L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', { name: 'CycleMap', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | Tiles &copy; <a href=\"http://www.opencyclemap.org\">OpenCycleMap</a>', minZoom: 0, maxZoom: 18 }),
         MapBBCode.prototype.createOpenStreetMapLayer()
         <?php if(defined('BING_KEY') && strlen(BING_KEY) > 0 ) { ?>, new L.BingLayer('<?=BING_KEY ?>', { name: 'Bing Satellite' })<?php } ?>
     ]}

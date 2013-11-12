@@ -11,6 +11,7 @@ Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and
 * Merge imported traces with existing data. [#2](https://github.com/MapBBCode/share.mapbbcode.org/issues/2)
 * Highlight "Save" button on map change. [#1](https://github.com/MapBBCode/share.mapbbcode.org/issues/1)
 * Rephrased the message with a link for sharing.
+* New OpenMapSurfer tile URL.
 * New configuration keys: `BING_KEY`, `IMPORT_SINGLE`.
 
 ### 1.0-1, 2013-11-01
