@@ -5,15 +5,19 @@ function getdb() {
     global $db;
     if( isset($db) )
         return $db;
-    if( strlen(DB_DATABASE) == 0 )
-        $db = false;
-    else {
-        $db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
-        if( $db->connect_errno )
-            die('Cannot connect to database: ('.$db->connect_errno.') '.$db->connect_error);
-        $db->set_charset('utf8');
-    }
+    if( !db_available() )
+        return false;
+
+    $db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
+    if( $db->connect_errno )
+        die('Cannot connect to database: ('.$db->connect_errno.') '.$db->connect_error);
+    $db->set_charset('utf8');
     return $db;
+}
+
+// the service can work without a database
+function db_available() {
+    return defined('DB_DATABASE') && strlen(DB_DATABASE) > 0;
 }
 
 // create tables if they do not exist

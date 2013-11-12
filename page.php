@@ -30,7 +30,8 @@
         opacity: 0.7;
         padding: 6px 16px;
         color: black;
-        text-align: center;
+        text-align: left;
+        line-height: 1.5;
         border: none;
         z-index: 3000;
     }
@@ -184,7 +185,7 @@
     <input type="button" id="editrawbtn" value="Apply">
     <input type="button" id="editrawcancel" value="Cancel">
     <a href="http://mapbbcode.org" target="mapbbspec">What is MapBBCode?</a> |
-    <a href="https://github.com/MapBBCode/mapbbcode/blob/master/BBCODE.md" target="mapbbspec">BBCode Specification</a>
+    <a href="http://mapbbcode.org/bbcode.html" target="mapbbspec">BBCode Specification</a>
 </div>
 </div>
 
@@ -248,7 +249,7 @@ mapBB.setStrings({ helpContents: [
     'The author\'s goal is to spread the [map] bbcode as wide as possible, integrating it into all major CMS and forum engines, like WordPress, vBulletin and MediaWiki. Let\'s make drawing and sharing maps as easy as sharing images and code! To learn more about MapBBCode library and applications using it, visit <a href="http://mapbbcode.org/" target="mapbb">mapbbcode.org</a>.',
     '# Is it secret? Is it safe?',
     'Maps you save do not appear in any directories and are almost impossible to find without you sharing a link (be careful not to lose links to important maps). When you sign in, your identifier is hashed before storing to the database, so even the site administrator would not know you are making maps. The data you create here is yours and has a license of your choosing: we don\'t impose any rules on its openness or visibility.',
-    'The site was created by Ilya Zverev. <a href="https://github.com/MapBBCode/share.mapbbcode.org" target="mapbb">MapBBCode Share</a> version 1.0-1.'
+    'The site was created by Ilya Zverev. <a href="https://github.com/MapBBCode/share.mapbbcode.org" target="mapbb">MapBBCode Share</a> version 1.0-2.'
 ]});
 
 <?php if( $editing ): ?>
@@ -310,7 +311,7 @@ function openEditor( bbcode ) {
     document.getElementById('titleedit').style.display = 'block';
     document.getElementById('title').style.display = 'block';
     var edit = mapBB.editor('mapedit', bbcode);
-    var save = L.functionButton('<span style="font-size: 12pt;">Save</span>', { position: 'topleft', bgColor: '#fdd' });
+    var save = L.functionButton('<span style="font-size: 12pt;">Save</span>', { position: 'topleft' });
     save.on('clicked', function() {
         submit('save', edit);
     });
@@ -351,6 +352,7 @@ function addImportExport(ui) {
 }
 
 function addLogin(ui) {
+    <?php if( !db_available() ) { ?>return;<?php } ?>
     var loggedIn = <?=isset($userid) ? 'true' : 'false' ?>;
     var login = L.functionButton(loggedIn ? 'Library' : 'Sign In', { position: 'topright' });
     login.on('clicked', function() {
@@ -372,7 +374,7 @@ function addLogin(ui) {
 
 function submit( action, edit ) {
     var bbcode = edit ? edit.getBBCode() : window.storedBBCode;
-    if( !bbcode ) return;
+    if( !bbcode ) return; // todo: is it needed? submit() from view does nothing
     var form = document.getElementById('fm');
     form.action = '/' + (action || '');
     form.elements['title'].value = document.getElementById('titleinput').value;

@@ -92,12 +92,13 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
         } else {
             $newcode = false;
             $seditid = $aparam;
-            $message = '<b><a href="/'.$action.'" target="mapbbstatic">Link for sharing</a></b>. Bookmark this page to alter the map later';
+            $message = '<b><a href="/'.$action.'" target="mapbbstatic">Share this link</a></b> for read-only view of this map.<br><a href="/'.$action.'/'.$aparam.'">Bookmark this</a> to edit the map later';
             $nohide = 1; // do not hide message
             if( isset($userid) ) {
                 update_library($userid, $scodeid, $seditid);
                 $message .= ' (or check the library)';
-            }
+            } elseif( db_available() )
+                $message .= ' (sign in to have it stored for you automatically)';
         }
         $readpost = false;
     } else {
@@ -219,14 +220,14 @@ function save( $title, $bbcode ) {
         $sql = !$db ? '' : "insert into ".DB_TABLE." (created, updated, codeid, editid, title, bbcode) values(now(), now(), '$codeid', '$editid', '".$db->escape_string($title)."', '".$db->escape_string($bbcode)."')";
     }
 
-	if( $db ) {
-		$res = $db->query($sql);
-	} else {
-		// put code to cache
-		$assoc = array('editid' => $editid, 'title' => $title, 'bbcode' => $bbcode);
-		cache_put($codeid, 'code', $assoc);
-		$res = true;
-	}
+    if( $db ) {
+        $res = $db->query($sql);
+    } else {
+        // put code to cache
+        $assoc = array('editid' => $editid, 'title' => $title, 'bbcode' => $bbcode);
+        cache_put($codeid, 'code', $assoc);
+        $res = true;
+    }
     if( !$api ) {
         if( !$res ) {
             $message = 'Failed to insert entry in the database: '.$db->error;
@@ -266,6 +267,21 @@ function update_library( $userid, $codeid, $editid ) {
         $db->query($sql);
     }
     cache_remove($userid, 'user');
+}
+
+// Removes a bookmark from user's library
+function remove_bookmark( $userid, $codeid ) {
+    $db = getdb();
+    if( !$db )
+        return false;
+    $uidesc = $db->escape_string($userid);
+    $sql = 'delete from '.DB_TABLE."_users where codeid = '$codeid' and userid = '$uidesc'";
+    $res = $db->query($sql);
+    if( $res && $db->affected_rows > 0 ) {
+        cache_remove($userid, 'user');
+        return true;
+    }
+    return false;
 }
 
 // Returns as array of all library entries sorted by update time
