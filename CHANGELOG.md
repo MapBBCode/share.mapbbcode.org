@@ -2,6 +2,11 @@
 
 Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and `S` is the Share build, independent of the library version. There are no "stable" versions and releases: the latest version is always the one to install.
 
+### 1.1-3, 2013-11-13
+
+* Updated MapBBCode to version 1.1.0.
+* Updated MapBBCode parsing functions, semicolons in titles are now processed correctly.
+
 ### 1.0-2, 2013-11-12
 
 * Empty CSV now doesn't have a header to not confuse users; single path is saved as csv.

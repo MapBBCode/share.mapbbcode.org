@@ -22,9 +22,9 @@ function mapbbcode_stats( $bbcode ) {
         return $cnt;
 
     if( count($m) > 4 ) {
-        $items = explode(';', str_replace(';;', '##%##', $m[4]));
-        foreach( $items as $s ) {
-            $s = str_replace('##%##',';', $s);
+        $items = $m[4];
+        while( preg_match('/^\\s*(?:;\\s*)?('.$re['mapel'].')/', $items, $itm) ) {
+            $s = $itm[1];
             $coords = 0;
             $first;
             $eqfirst = false;
@@ -45,6 +45,7 @@ function mapbbcode_stats( $bbcode ) {
                 $cnt[1]++;
             elseif( $coords > 1 && $eqfirst )
                 $cnt[2]++;
+            $items = substr($items, strlen($itm[0]));
         }
     }
 
@@ -65,10 +66,9 @@ function mapbbcode_to_array( $bbcode ) {
     }
 
     if( count($m) > 4 ) {
-        // todo: parse elements etc etc
-        $items = explode(';', str_replace(';;', '##%##', $m[4]));
-        foreach( $items as $s ) {
-            $s = str_replace('##%##',';', $s);
+        $items = $m[4];
+        while( preg_match('/^\\s*(?:;\\s*)?('.$re['mapel'].')/', $items, $itm) ) {
+            $s = $itm[1];
             $coords = array();
             $params = array();
             $text = '';
@@ -78,12 +78,12 @@ function mapbbcode_to_array( $bbcode ) {
                 $s = substr($s, strlen($mc[0]));
                 $hnc = preg_match('/^'.$re['coord'].'/', $s, $mc);
             }
-            if( preg_match('/'.$re['params'].'/', $s, $mc ) ) {
-                if( strlen($mc[1]) > 0 )
-                    $params = explode(',', $mc[1]);
-                $text = trim(str_replace('\\)', ')', $mc[2]));
-            }
+            if( count($itm) > 6 && strlen($itm[6]) > 0 )
+                $params = explode(',', $itm[6]);
+            if( count($itm) > 7 && strlen(trim($itm[7])) > 0 )
+                $text = trim(str_replace('\\)', ')', $itm[7]));
             $result['objs'][] = array('coords' => $coords, 'text' => $text, 'params' => $params);
+            $items = substr($items, strlen($itm[0]));
         }
     }
 
@@ -116,7 +116,7 @@ function array_to_mapbbcode( $data ) {
             $str .= '(';
             if( count($params) > 0 )
                 $str .= implode(',', $params).'|';
-            $str .= str_replace(';', ';;', str_replace(')', '\\)', $text)).')';
+            $str .= str_replace(')', '\\)', $text).')';
         }
         if( count($coords) == 1 )
             $markers[] = $str;
