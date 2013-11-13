@@ -6,6 +6,7 @@ Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and
 
 * Updated MapBBCode to version 1.1.0.
 * Updated MapBBCode parsing functions, semicolons in titles are now processed correctly.
+* Forgot to replace one bbcode specification link.
 
 ### 1.0-2, 2013-11-12
 
