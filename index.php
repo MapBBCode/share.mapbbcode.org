@@ -7,7 +7,7 @@ require('db.php');
 define('SCRIPT_NAME', 'index.php');
 if( !defined('MOD_REWRITE') )
     define('MOD_REWRITE', in_array('mod_rewrite', apache_get_modules()) && file_exists('.htaccess'));
-$doc_path = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+$doc_path = 'http://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $base_path = MOD_REWRITE ? $doc_path : $doc_path.'/'.SCRIPT_NAME;
 
 ini_set('session.gc_maxlifetime', 7776000);
