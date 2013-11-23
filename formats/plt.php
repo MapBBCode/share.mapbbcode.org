@@ -7,6 +7,8 @@ class PLTFormat implements Format {
 
     public function export( $data ) {
         $title = strlen($data['title']) > 0 ? str_replace(',', ' ', $data['title']) : date('d.m.Y H:i:s');
+        if( defined('OZI_CHARSET') )
+            $title = iconv('UTF-8', OZI_CHARSET.'//TRANSLIT', $title);
         $out = <<<PLTHEAD
 OziExplorer Track Point File Version 2.1
 WGS 84
@@ -40,8 +42,11 @@ PLTHEAD;
         while( ($line = fgets($file, 500)) !== false ) {
             $items = explode(',', $line);
             if( ++$i == 5 ) {
-                if( count($items) > 5 )
+                if( count($items) > 5 ) {
                     $title = trim($items[3]);
+                    if( defined('OZI_CHARSET') )
+                        $title = iconv(OZI_CHARSET, 'UTF-8//IGNORE', str_replace(chr(209), ',', $title));
+                }
             } elseif( $i > 5 && count($items) > 5 ) {
                 $lat = $items[0];
                 $lon = $items[1];

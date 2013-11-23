@@ -4,7 +4,9 @@ Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and
 
 ### 1.1-5, 2013-11-23
 
-* Website now works in subfolders and without mod_rewrite.
+* Website now works in subfolders and without mod_rewrite. [#4](https://github.com/MapBBCode/share.mapbbcode.org/issues/4)
+* Fixed edit id reset after importing a file. [#7](https://github.com/MapBBCode/share.mapbbcode.org/issues/7)
+* OziExplorer formats now can have their own encoding (usually iso or cp1251). [#6](https://github.com/MapBBCode/share.mapbbcode.org/issues/6)
 
 ### 1.1-4, 2013-11-16
 

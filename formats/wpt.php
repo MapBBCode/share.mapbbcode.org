@@ -18,10 +18,10 @@ WPTHEAD;
             if( count($obj['coords']) == 1 ) {
                 $i++;
                 $c = $obj['coords'][0];
-                // iconv('UTF-8', 'ASCII//TRANSLIT', $obj['text']) doesn't work properly
-                $text = isset($obj['text']) ? str_replace(',', chr(209), trim($obj['text'])) : '';
-                if( strlen($text) == 0 )
-                    $text = $i;
+                $text = isset($obj['text']) && strlen(trim($obj['text'])) > 0 ? trim($obj['text']) : $i;
+                if( defined('OZI_CHARSET') )
+                    $text = iconv('UTF-8', OZI_CHARSET.'//TRANSLIT', $text);
+                $text = str_replace(',', chr(209), trim($text));
                 $out .= sprintf("%d,%s,%.5f,%.5f\n", $i, $text, $c[0], $c[1]);
             }
         }
@@ -36,16 +36,18 @@ WPTHEAD;
         $objs = array();
         $i = 0;
         while( ($line = fgets($file, 500)) !== false ) {
-            $items = explode(',', $line);
+            $items = explode(',', trim($line));
             if( ++$i > 4 && count($items) > 3 ) {
                 $title = $items[1];
+                if( defined('OZI_CHARSET') )
+                    $title = iconv(OZI_CHARSET, 'UTF-8//IGNORE', str_replace(chr(209), ',', $title));
                 $lat = $items[2];
                 $lon = $items[3];
                 if( is_numeric($lat) && is_numeric($lon) ) {
                     $coord = array((float)$lat, (float)$lon);
                     $obj = array( 'coords' => array($coord) );
                     if( strlen(trim($title)) > 0 )
-                        $obj['text'] = str_replace(chr(209), ',', $title);
+                        $obj['text'] = trim($title);
                     $objs[] = $obj;
                 }
             }
