@@ -12,6 +12,8 @@
     const MAX_IMPORT_NODES = 200; // nodes in imported gps traces
     const MAX_TOTAL_NODES = 1000; // total nodes in all imported gps traces
     const IMPORT_SINGLE = false; // clear map on import
+    //const MOD_REWRITE = true; // set to explicit value if autodetection is wrong
+    const OZI_CHARSET = 'CP1251'; // charset for OziExplorer formats, UTF-8 by default
 
     // set this to your timezone or whatever (doesn't really matter)
     date_default_timezone_set('UTC');

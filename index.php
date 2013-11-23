@@ -1,7 +1,14 @@
 <?php
+define('IN_MAPBBCODE', 1);
 require('config.php');
 require('convert.php');
 require('db.php');
+
+define('SCRIPT_NAME', 'index.php');
+if( !defined('MOD_REWRITE') )
+    define('MOD_REWRITE', in_array('mod_rewrite', apache_get_modules()) && file_exists('.htaccess'));
+$doc_path = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+$base_path = MOD_REWRITE ? $doc_path : $doc_path.'/'.SCRIPT_NAME;
 
 ini_set('session.gc_maxlifetime', 7776000);
 ini_set('session.cookie_lifetime', 7776000);
@@ -10,39 +17,81 @@ session_start();
 
 //if( $_SERVER['HTTP_HOST'] == 'localhost' ) $userid = 'test';
 
-if( isset($_SERVER['REDIRECT_URL']) && preg_match('#^/?([a-zA-Z0-9_-]+)/?(?:/([a-z]+))?$/?#', $_SERVER['REDIRECT_URL'], $m) ) {
-    $action = $m[1];
-    $aparam = count($m) > 2 ? $m[2] : '';
-} else {
-    $action = '';
-}
-
 if( isset($_SESSION['user_id']) )
     $userid = $_SESSION['user_id'];
 
-$bbcode = '';
-$title = '';
-$editing = true;
-$newcode = true;
-$readpost = true;
-$fmtdesc = get_format_arrays();
 $message = '';
 $api = isset($_REQUEST['api']);
+$params = parse_params();
+$action = $params['action'];
+$bbcode = $params['bbcode'];
+$title = $params['title'];
 
+if( isset($params['id']) )
+    $scodeid = $params['id'];
+if( isset($params['editid']) )
+    $seditid = $params['editid'];
+
+$data = false;
+if( isset($scodeid) ) {
+    $data = get_data($scodeid);
+    if( !$data ) {
+        if( $api )
+            return_json(array('error' => 'No such code: '.$scodeid));
+        $message = 'There is no code in the database with given id';
+    }
+}
+
+if( $action == '' && $data && !$params['post'] ) {
+    // only for GET requests with id (that is, not ?bbcode=)
+    $bbcode = $data['bbcode'];
+    $title = $data['title'];
+
+    if( $api )
+        return_json(array('title' => $title, 'bbcode' => $bbcode));
+
+} elseif( $action == '' && isset($_GET['gz']) && strlen($_GET['gz']) > 12 ) {
+    // action is base64-encoded bbcode+title
+    $res = decompress_bbcode($_GET['gz']);
+    if( $res && count($res) == 2 && strlen($res[1]) > 10 ) {
+        $title = $res[0];
+        $bbcode = $res[1];
+    }
+}
+
+if( $data && isset($params['key']) && $params['key'] == $data['editid'] ) {
+    $newcode = false;
+    $seditid = $params['key'];
+    $message = '<b><a href="'.$base_path.'/'.$params['id'].'" target="mapbbstatic">Share this link</a></b> for read-only view of this map.<br><a href="'.$base_path.'/'.$params['id'].'/'.$params['key'].'">Bookmark this</a> to edit the map later';
+    $nohide = 1; // do not hide message
+    if( isset($userid) ) {
+        update_library($userid, $scodeid, $seditid);
+        $message .= ' (or check the library)';
+    } elseif( db_available() )
+        $message .= ' (sign in to have it stored for you automatically)';
+}
+
+$editing = $params['post'] || isset($seditid) || (strlen($bbcode) == 0 && strlen($title) == 0);
+$newcode = !isset($seditid);
+
+// see also $actions array in parse_surl
 if( $action == 'initdb' && NEED_INIT_DB ) {
     initdb();
 
 } elseif( $action == 'fmtlist' ) {
+    $fmtdesc = get_format_arrays();
     return_json($fmtdesc);
+
+} elseif( $action == 'save' ) {
+    save($params, $data);
 
 } elseif( $action == 'signout' ) {
     unset($_SESSION['user_id']);
     unset($userid);
 
-} elseif( $action == 'save' && isset($_POST['bbcode']) && isset($_POST['title']) ) {
-    $bbcode = $_POST['bbcode'];
-    $title = $_POST['title'];
-    save($title, $bbcode);
+} elseif( $action == 'bookmark' && isset($userid) && $data ) {
+    update_library($userid, $params['id'], '');
+    $message = 'The code was added to your library';
 
 } elseif( $action == 'import' && isset($_FILES['file']) ) {
     if( !is_uploaded_file($_FILES['file']['tmp_name']) || $_FILES['file']['size'] == 0 || $_FILES['file']['error'] > 0 ) {
@@ -53,109 +102,39 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
         else
             $message = 'File upload error ('.$err.')';
     } else {
-        $titlebb = import($_FILES['file']['tmp_name']);
+        $titlebb = defined('IMPORT_SINGLE') && !IMPORT_SINGLE ? array($title, $bbcode) : array('', '');
+        $titlebb = import($_FILES['file']['tmp_name'], $titlebb);
         $title = $titlebb[0];
         $bbcode = $titlebb[1];
-        $readpost = false;
         if( $api )
             return_json(array('title' => $title, 'bbcode' => $bbcode));
     }
+}
 
-} elseif( $action == 'export' && isset($_POST['bbcode']) && isset($_POST['title']) && strlen($aparam) > 0 ) {
-    $result = export($aparam, $_POST['title'], $_POST['bbcode'], isset($_POST['codeid']) ? $_POST['codeid'] : '');
+if( isset($_REQUEST['format']) && preg_match('/^[a-z]+$/', $_REQUEST['format']) ) {
+    $format = $_REQUEST['format'];
+    header('Access-Control-Allow-Origin: *');
+    $result = export($format, $title, $bbcode, isset($scodeid) ? $scodeid : '');
     if( $result == CONVERT_OK )
         exit;
-    elseif( $result == CONVERT_NOT_SUPPORTED )
-        $message = 'Unknown or unimplemented export type: '.$aparam;
-    elseif( $result == CONVERT_EMPTY )
-        $message = 'Output file is empty';
-
-} elseif( $action == 'bookmark' && isset($userid) && isset($_POST['codeid']) ) {
-    if( get_data($_POST['codeid']) ) {
-        update_library($userid, $_POST['codeid'], '');
-        $message = 'The code was added to your library';
-    }
-
-} elseif( strlen($action) == HASH_LENGTH || strlen($action) == 4 ) { // 4 is legacy, todo remove after Nov 30
-    // find $action in the table
-    $data = get_data($action);
-    if( $data ) {
-        $bbcode = $data['bbcode'];
-        $title = $data['title'];
-        $scodeid = $action;
-
-        if( $api )
-            return_json(array('title' => $title, 'bbcode' => $bbcode));
-
-        if( $aparam != $data['editid'] ) {
-            $editing = false;
-        } else {
-            $newcode = false;
-            $seditid = $aparam;
-            $message = '<b><a href="/'.$action.'" target="mapbbstatic">Share this link</a></b> for read-only view of this map.<br><a href="/'.$action.'/'.$aparam.'">Bookmark this</a> to edit the map later';
-            $nohide = 1; // do not hide message
-            if( isset($userid) ) {
-                update_library($userid, $scodeid, $seditid);
-                $message .= ' (or check the library)';
-            } elseif( db_available() )
-                $message .= ' (sign in to have it stored for you automatically)';
+    if( $result == CONVERT_NOT_SUPPORTED ) {
+        if( $action == 'export' )
+            $message = 'Unknown or unimplemented export type: '.$format;
+        else {
+            header('HTTP/1.1 415 Format Not Suppoprted');
+            exit;
         }
-        $readpost = false;
-    } else {
-        if( $api )
-            return_json(array('error' => 'No such code: '.$action));
-        $message = 'There is no code in the database with given id';
-    }
-
-} elseif( strlen($action) > 0 && $api ) {
-    // very incorrect id
-    return_json(array('error' => 'Incorrect code: '.$action));
-
-} elseif( isset($_GET['gz']) && strlen($_GET['gz']) > 12 ) {
-    // action is base64-encoded bbcode+title
-    $res = decompress_bbcode($_GET['gz']);
-    if( $res && count($res) == 2 && strlen($res[1]) > 10 ) {
-        $title = $res[0];
-        $bbcode = $res[1];
-        $editing = false;
-    }
-
-} else {
-    // title and bbcode parameters
-    $title = isset($_GET['title']) ? $_GET['title'] : '';
-    if( isset($_GET['bbcode']) ) {
-        $bbcode = trim($_GET['bbcode']);
-        if( substr($bbcode, 0, 4) != '[map' && substr($bbcode, -6) != '[/map]' )
-            $bbcode = '[map]'.$bbcode.'[/map]';
-        $editing = false;
+    } elseif( $result == CONVERT_EMPTY ) {
+        if( $action == 'export' )
+            $message = 'Output file is empty';
+        else {
+            header('HTTP/1.1 400 No Data In BBCode');
+            exit;
+        }
     }
 }
 
-if( $readpost ) {
-    // update fields from POST request
-    if( isset($_POST['bbcode']) && strlen($_POST['bbcode']) > 0 ) {
-        $bbcode = $_POST['bbcode'];
-        $editing = true;
-    }
-    if( isset($_POST['title']) && strlen($_POST['title']) > 0 )
-        $title = $_POST['title'];
-    if( isset($_POST['codeid']) && strlen($_POST['codeid']) > 0 )
-        $scodeid = $_POST['codeid'];
-    if( isset($_POST['editid']) && strlen($_POST['editid']) > 0 ) {
-        $seditid = $_POST['editid'];
-        $newcode = false;
-    }
-}
-
-if( isset($_GET['format']) && strlen($_GET['format']) > 0 ) {
-    header('Access-Control-Allow-Origin: *');
-    $result = export($_GET['format'], $title, $bbcode, isset($scodeid) ? $scodeid : '', false);
-    if( $result == CONVERT_NOT_SUPPORTED )
-        header('HTTP/1.1 415 Format Not Suppoprted');
-    elseif( $result == CONVERT_EMPTY )
-        header('HTTP/1.1 400 No Data In BBCode');
-    exit;
-}
+$fmtdesc = get_format_arrays();
 
 if( !$editing && strlen($bbcode) < 11 )
     $bbcode = '[map][/map]';
@@ -180,8 +159,10 @@ function return_json( $data ) {
 }
 
 // save bbcode to database (or update)
-function save( $title, $bbcode ) {
-    global $message, $api;
+function save( $params, $data ) {
+    global $message, $api, $base_path;
+    $title = $params['title'];
+    $bbcode = $params['bbcode'];
 
     if( strlen($title) < 3 && strlen($bbcode) < 7 ) {
         if( $api )
@@ -196,17 +177,11 @@ function save( $title, $bbcode ) {
         $title = substr($title, 0, $spacepos !== false ? $spacepos : 250);
     }
 
-    $codeid = isset($_POST['codeid']) && isset($_POST['editid']) ? $_POST['codeid'] : '';
-    $editid = false;
-    if( isset($_POST['codeid']) && strlen($_POST['codeid']) == HASH_LENGTH && preg_match('/^[a-z]+$/', $_POST['codeid']) ) {
-        $data = get_data($_POST['codeid']);
-        if( $data )
-            $editid = $data['editid'];
-    }
-
     $db = getdb();
-    if( $editid && $editid == $_POST['editid'] ) {
+    if( $data && isset($params['key']) && $data['editid'] == $params['key'] ) {
         // update
+        $codeid = $params['id'];
+        $editid = $params['key'];
         $sql = !$db ? '' : "update ".DB_TABLE." set updated=now(), title='".$db->escape_string($title)."', bbcode='".$db->escape_string($bbcode)."' where codeid = '$codeid'";
         cache_remove($codeid, 'code');
         cache_remove(false, 'user'); // yup, now a lot of users can have their libraries updated
@@ -232,14 +207,14 @@ function save( $title, $bbcode ) {
         if( !$res ) {
             $message = 'Failed to insert entry in the database: '.$db->error;
         } else {
-            header("Location: http://".$_SERVER['HTTP_HOST']."/$codeid/$editid");
+            header("Location: ".$base_path."/$codeid/$editid");
             exit;
         }
     } else {
         if( !$res ) {
             return_json(array('error' => 'Failed to insert entry in the database: '.$db->error));
         } else {
-            return_json(array('codeid' => $codeid, 'editid' => $editid, 'viewurl' => "http://".$_SERVER['HTTP_HOST']."/$codeid", 'editurl' => "http://".$_SERVER['HTTP_HOST']."/$codeid/$editid"));
+            return_json(array('codeid' => $codeid, 'editid' => $editid, 'viewurl' => $base_path."/$codeid", 'editurl' => $base_path."/$codeid/$editid"));
         }
         exit;
     }
@@ -383,6 +358,60 @@ function human_date($sqldate, $sqlnow = false) {
         return $month.' '.idate('d', $date);
     else
         return $month.' '.date('Y', $date);
+}
+
+// ---------------------------------- URL PARSING ----------------------------
+
+// returns URL for those three parameters
+function build_url( $action, $codeid = '', $editid = '' ) {
+    global $base_path;
+    $url = $base_path;
+    if( strlen($codeid) > 0 ) {
+        $url .= '/'.$codeid;
+        if( strlen($editid) > 0 )
+            $url .= '/'.$editid;
+    }
+    if( strlen($action) > 0 )
+        $url .= '?'.$action;
+    return $url;
+}
+
+// returns array(action, id?, key?)
+function parse_surl() {
+    $base_path = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+    $url = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : $_SERVER['PHP_SELF'];
+    if( substr($url, 0, strlen($base_path)) == $base_path )
+        $url = substr($url, strlen($base_path));
+    if( substr($url, 1, strlen(SCRIPT_NAME)) == SCRIPT_NAME )
+        $url = substr($url, strlen(SCRIPT_NAME) + 1);
+
+    $result = array('action' => '');
+    $actions = array('initdb', 'fmtlist', 'save', 'signout', 'bookmark', 'import', 'export');
+    if( preg_match('#^/?([a-z]+)(?:/([a-z]+))?/?#', $url, $m) ) {
+        $result[in_array($m[1], $actions) ? 'action' : 'id'] = $m[1];
+        $result['key'] = count($m) > 2 ? $m[2] : '';
+    }
+    return $result;
+}
+
+// returns array(action, id?, key?, codeid?, editid?, title, bbcode)
+function parse_params() {
+    $result = parse_surl();
+    if( isset($_POST['codeid']) && preg_match('/^[a-z]+$/', $_POST['codeid']) && (strlen($_POST['codeid']) == HASH_LENGTH || strlen($_POST['codeid'] == 4)) ) {
+        // todo: remove 4 after mid-december?
+        $result['codeid'] = $_POST['codeid'];
+        $result['id'] = $result['codeid']; // POST overrides GET
+    } if( isset($_POST['editid']) && preg_match('/^[a-z]+$/', $_POST['editid']) ) {
+        $result['editid'] = $_POST['editid'];
+        $result['key'] = $result['editid'];
+    }
+    $result['title'] = trim(isset($_POST['title']) && strlen($_POST['title']) > 0 ? $_POST['title'] : (!isset($result['codeid']) && isset($_GET['title']) ? $_GET['title'] : ''));
+    $result['post'] = isset($_POST['bbcode']) && strlen($_POST['bbcode']) > 0;
+    $bbcode = trim($result['post'] ? $_POST['bbcode'] : (!isset($result['codeid']) && isset($_GET['bbcode']) ? $_GET['bbcode'] : ''));
+    if( strlen($bbcode) > 0 && (strlen($bbcode) < 8 || (substr($bbcode, 0, 4) != '[map' && substr($bbcode, -6) != '[/map]')) )
+        $bbcode = '[map]'.$bbcode.'[/map]';
+    $result['bbcode'] = $bbcode;
+    return $result;
 }
 
 ?>

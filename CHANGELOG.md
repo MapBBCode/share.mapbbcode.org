@@ -2,6 +2,10 @@
 
 Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and `S` is the Share build, independent of the library version. There are no "stable" versions and releases: the latest version is always the one to install.
 
+### 1.1-5, 2013-11-23
+
+* Website now works in subfolders and without mod_rewrite.
+
 ### 1.1-4, 2013-11-16
 
 * Updated MapBBCode to version 1.1.1.

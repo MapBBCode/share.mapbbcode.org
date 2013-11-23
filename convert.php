@@ -100,7 +100,7 @@ function import_get_format( $header ) {
 }
 
 // reads file and returns array(title, bbcode) for it. On error returns array('', '')
-function import( $filename ) {
+function import( $filename, $old_titlebb ) {
     $data = false;
     if( ($handle = fopen($filename, 'r')) !== false ) {
         $header = fread($handle, 2000);
@@ -123,14 +123,12 @@ function import( $filename ) {
             fclose($handle);
     }
 
-    $old_bbcode = defined('IMPORT_SINGLE') && !IMPORT_SINGLE && isset($_POST['bbcode']) ? $_POST['bbcode'] : '';
-    $old_title = defined('IMPORT_SINGLE') && !IMPORT_SINGLE && isset($_POST['title']) ? $_POST['title'] : '';
     if( $data ) {
-        $title = strlen($old_title) > 0 ? $old_title : (isset($data['title']) ? $data['title'] : '');
-        $bbcode = merge_mapbbcode(array_to_mapbbcode($data), $old_bbcode);
+        $title = strlen($old_titlebb[0]) > 0 ? $old_titlebb[0] : (isset($data['title']) ? $data['title'] : '');
+        $bbcode = merge_mapbbcode(array_to_mapbbcode($data), $old_titlebb[1]);
         return array($title, $bbcode);
     }
-    return array($old_title, $old_bbcode);
+    return $old_titlebb;
 }
 
 // simplifies paths in the array

@@ -4,19 +4,20 @@
 <title><?=isset($title) && strlen($title) > 0 ? htmlspecialchars($title).' — ' : (isset($scodeid) && strlen($scodeid) > 0 ? $scodeid.' — ' : '') ?>MapBBCode Share</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <?php if( isset($seditid) ) { ?><meta name="robots" content="noindex, nofollow"><?php } ?>
-<link rel="stylesheet" href="/lib/leaflet.css" />
-<link rel="stylesheet" href="/lib/leaflet.draw.css" />
+<?php $lib = $doc_path.'/lib'; ?>
+<link rel="stylesheet" href="<?=$lib ?>/leaflet.css" />
+<link rel="stylesheet" href="<?=$lib ?>/leaflet.draw.css" />
 <!--[if lte IE 8]>
-    <link rel="stylesheet" href="/lib/leaflet.ie.css" />
-    <link rel="stylesheet" href="/lib/leaflet.draw.ie.css" />
+    <link rel="stylesheet" href="<?=$lib ?>/leaflet.ie.css" />
+    <link rel="stylesheet" href="<?=$lib ?>/leaflet.draw.ie.css" />
 <![endif]-->
-<script src="/lib/leaflet.js"></script>
-<script src="/lib/leaflet.draw.js"></script>
-<script src="/lib/Bing.js"></script>
-<script src="/lib/mapbbcode.js"></script>
-<script src="/lib/Param.Simplify.js"></script>
-<script src="/lib/Param.Measure.js"></script>
-<script src="/lib/StaticLayerSwitcher.js"></script>
+<script src="<?=$lib ?>/leaflet.js"></script>
+<script src="<?=$lib ?>/leaflet.draw.js"></script>
+<script src="<?=$lib ?>/Bing.js"></script>
+<script src="<?=$lib ?>/mapbbcode.js"></script>
+<script src="<?=$lib ?>/Param.Simplify.js"></script>
+<script src="<?=$lib ?>/Param.Measure.js"></script>
+<script src="<?=$lib ?>/StaticLayerSwitcher.js"></script>
 <style>
     html, body, #mapedit, .leaflet-container { height: 100%; margin: 0; }
     body {
@@ -49,6 +50,7 @@
         border-radius: 6px;
         background-color: white;
         opacity: 0.9;
+        z-index: 1000;
     }
     #titleview {
         text-align: center;
@@ -197,9 +199,9 @@
 <div id="histlistcontainer">
     <div id="historylist">
     <div class="history-entry">
-    $$<div class="edit"><a href="/{codeid}/{editid}">edit</a></div>$$
+    $$<div class="edit"><a href="<?=$base_path ?>/{codeid}/{editid}">edit</a></div>$$
     <div class="date">{updated}</div>
-    <div class="title"><a href="/{codeid}" target="mapnew">{title}</a></div>
+    <div class="title"><a href="<?=$base_path ?>/{codeid}" target="mapnew">{title}</a></div>
     </div>
     </div>
 </div>
@@ -210,9 +212,10 @@
 </div>
 </div>
 
-<form action="/" method="post" id="fm" enctype="multipart/form-data">
+<form action="<?=$base_path ?>" method="post" id="fm" enctype="multipart/form-data">
     <input type="hidden" name="title" value=""/>
     <input type="hidden" name="bbcode" value=""/>
+    <input type="hidden" name="format" value=""/>
     <input type="hidden" name="codeid" value="<?=isset($scodeid) ? $scodeid : '' ?>"/>
     <input type="hidden" name="editid" value="<?=isset($seditid) ? $seditid : '' ?>"/>
     <input type="file" name="file">
@@ -263,7 +266,7 @@ var show = mapBB.show('mapedit', bbcode);
 if( typeof editid === 'string' ) {
     var editBtn = L.functionButton('Edit', { position: 'topleft' });
     editBtn.on('clicked', function() {
-        window.location = '/<?=$scodeid?>/' + editid;
+        window.location = '<?=$base_path ?>/<?=$scodeid?>/' + editid;
     });
     show.map.addControl(editBtn);
 }
@@ -349,7 +352,7 @@ function addImportExport(ui) {
     });
     exprt.on('export', function(e) {
         if( e.fmt )
-            submit('export/' + e.fmt, ui);
+            submit('export', ui, e.fmt);
     });
     ui.map.addControl(exprt);
 }
@@ -375,13 +378,14 @@ function addLogin(ui) {
     };
 }
 
-function submit( action, edit ) {
+function submit( action, edit, format ) {
     var bbcode = edit ? edit.getBBCode() : window.storedBBCode;
     if( !bbcode ) return; // todo: is it needed? submit() from view does nothing
     var form = document.getElementById('fm');
-    form.action = '/' + (action || '');
+    form.action = '<?=$base_path ?>/' + (action || '');
     form.elements['title'].value = document.getElementById('titleinput').value;
     form.elements['bbcode'].value = bbcode;
+    form.elements['format'].value = format || '';
     form.submit();
 }
 
