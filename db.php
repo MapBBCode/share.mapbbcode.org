@@ -115,7 +115,7 @@ function cache_remove( $id, $prefix ) {
             $p = $prefix.'_';
             foreach( $files as $f ) {
                 if( substr($f, 0, strlen($p)) == $p )
-                    @unlink('cache/'.$p.$f);
+                    @unlink('cache/'.$f);
             }
         }
     }

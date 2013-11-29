@@ -238,7 +238,7 @@ var mapBB = new MapBBCode({
     fullFromStart: true,
     editorCloseButtons: false,
     preferStandardLayerSwitcher: false,
-    leafletOptions: { scrollWheelZoom: true, minZoom: 3, maxZoom: 18 },
+    leafletOptions: { scrollWheelZoom: true, minZoom: 3, maxZoom: 18, attributionEditLink: true },
     measureButton: true,
     createLayers: function(L) { return [
         L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 18 }),
@@ -256,7 +256,7 @@ mapBB.setStrings({ helpContents: [
     'The author\'s goal is to spread the [map] bbcode as wide as possible, integrating it into all major CMS and forum engines, like WordPress, vBulletin and MediaWiki. Let\'s make drawing and sharing maps as easy as sharing images and code! To learn more about MapBBCode library and applications using it, visit <a href="http://mapbbcode.org/" target="mapbb">mapbbcode.org</a>.',
     '# Is it secret? Is it safe?',
     'Maps you save do not appear in any directories and are almost impossible to find without you sharing a link (be careful not to lose links to important maps). When you sign in, your identifier is hashed before storing to the database, so even the site administrator would not know you are making maps. The data you create here is yours and has a license of your choosing: we don\'t impose any rules on its openness or visibility.',
-    'The site was created by Ilya Zverev. <a href="https://github.com/MapBBCode/share.mapbbcode.org" target="mapbb">MapBBCode Share</a> version 1.1-6.'
+    'The site was created by Ilya Zverev. <a href="https://github.com/MapBBCode/share.mapbbcode.org" target="mapbb">MapBBCode Share</a> version 1.1-7.'
 ]});
 
 <?php if( $editing ): ?>
