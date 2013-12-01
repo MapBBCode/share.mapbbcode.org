@@ -2,7 +2,7 @@
 <html>
 <head>
 <title><?=isset($title) && strlen($title) > 0 ? htmlspecialchars($title).' — ' : (isset($scodeid) && strlen($scodeid) > 0 ? $scodeid.' — ' : '') ?>MapBBCode Share</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta charset="utf-8" />
 <?php if( isset($seditid) ) { ?><meta name="robots" content="noindex, nofollow"><?php } ?>
 <?php $lib = $doc_path.'/lib'; ?>
 <link rel="stylesheet" href="<?=$lib ?>/leaflet.css" />
@@ -13,11 +13,11 @@
 <![endif]-->
 <script src="<?=$lib ?>/leaflet.js"></script>
 <script src="<?=$lib ?>/leaflet.draw.js"></script>
-<script src="<?=$lib ?>/Bing.js"></script>
 <script src="<?=$lib ?>/mapbbcode.js"></script>
-<script src="<?=$lib ?>/Param.Simplify.js"></script>
-<script src="<?=$lib ?>/Param.Length.js"></script>
 <script src="<?=$lib ?>/StaticLayerSwitcher.js"></script>
+<script src="<?=$lib ?>/Bing.js"></script>
+<script src="<?=$lib ?>/Handler.Simplify.js"></script>
+<script src="<?=$lib ?>/Handler.Length.js"></script>
 <style>
     html, body, #mapedit, .leaflet-container { height: 100%; margin: 0; }
     body {
@@ -248,15 +248,17 @@ var mapBB = new MapBBCode({
     ]}
 });
 mapBB.setStrings({ helpContents: [
-    'MapBBCode Share',
-    'This is a site for creating and sharing maps, as simple as possible: draw some lines, place markers, click "Save" and send a link. You will be provided with two links: one for editing and one for viewing. You don\'t have to keep either of them secret. Collaborative editing! Alas, no versioning, so be careful, keep a backup copy. If you sign in, you won\'t need to bookmark anything: all maps you have edited will be stored in your library.',
-    'You can import files in more than ten formats, including GPX, CSV and GeoJSON, and export drawings even to HTML. This makes the site ideal for journey planning, or for easy making an HTML snippet out of a file. Note that all imported traces are simplified (and you can simplify them even more by clicking on a line): for storing original traces, browsing elevation profiles etc use <a href="http://www.gpsies.com/" target="mapbb">GPSies.com</a>.',
-    '# Map... BBcode?',
-    'When you click "Edit Raw", you will see the source code for your drawing. It is in <a href="http://mapbbcode.org/bbcode.html" target="mapbb">[map] bbcode format</a>: think of it as GeoJSON with few predefined properties, adapted for using inside forum and blog posts. Yes, you can paste the code on some forums as-is, or embed a MapBBCode Share panel, which gets updated when the source drawing is updated, and has an "Export" button.',
-    'The author\'s goal is to spread the [map] bbcode as wide as possible, integrating it into all major CMS and forum engines, like WordPress, vBulletin and MediaWiki. Let\'s make drawing and sharing maps as easy as sharing images and code! To learn more about MapBBCode library and applications using it, visit <a href="http://mapbbcode.org/" target="mapbb">mapbbcode.org</a>.',
-    '# Is it secret? Is it safe?',
-    'Maps you save do not appear in any directories and are almost impossible to find without you sharing a link (be careful not to lose links to important maps). When you sign in, your identifier is hashed before storing to the database, so even the site administrator would not know you are making maps. The data you create here is yours and has a license of your choosing: we don\'t impose any rules on its openness or visibility.',
-    'The site was created by Ilya Zverev. <a href="https://github.com/MapBBCode/share.mapbbcode.org" target="mapbb">MapBBCode Share</a> version 1.1-7.'
+<?php
+	$helpContents = explode("\n", file_get_contents('help.txt'));
+	$helpContents = str_replace('{version}', VERSION, $helpContents);
+	for( $i = 0; $i < count($helpContents); $i++ ) {
+		$line = trim($helpContents[$i]);
+		if( strlen($line) > 0 ) {
+			echo "\t'".str_replace("'", "\\'", $helpContents[$i])."'";
+			echo $i == count($helpContents) - 1 ? "\n" : ",\n";
+		}
+	}
+?>
 ]});
 
 <?php if( $editing ): ?>
@@ -312,7 +314,7 @@ function openEditor( bbcode ) {
             layer.on('edit remove', this.modified, this);
         }
     };
-    window.MapBBCode.objectParams.push(modifyListener);
+    window.mapBBCodeHandlers.push(modifyListener);
 
     document.getElementById('titleview').style.display = 'none';
     document.getElementById('titleedit').style.display = 'block';
