@@ -254,7 +254,7 @@ mapBB.setStrings({ helpContents: [
 	for( $i = 0; $i < count($helpContents); $i++ ) {
 		$line = trim($helpContents[$i]);
 		if( strlen($line) > 0 ) {
-			echo "\t'".str_replace("'", "\\'", $helpContents[$i])."'";
+			echo "\t'".str_replace("'", "\\'", $line)."'";
 			echo $i == count($helpContents) - 1 ? "\n" : ",\n";
 		}
 	}
