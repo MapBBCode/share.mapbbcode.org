@@ -7,6 +7,8 @@ class PLTFormat implements Format {
 
     public function export( $data ) {
         $title = strlen($data['title']) > 0 ? str_replace(',', ' ', $data['title']) : date('d.m.Y H:i:s');
+		if( strpos($title, '"') !== false )
+			$title = '"'.str_replace('"', '""', $title).'"';
         if( defined('OZI_CHARSET') )
             $title = iconv('UTF-8', OZI_CHARSET.'//TRANSLIT', $title);
         $out = <<<PLTHEAD
@@ -46,6 +48,8 @@ PLTHEAD;
                     $title = trim($items[3]);
                     if( defined('OZI_CHARSET') )
                         $title = iconv(OZI_CHARSET, 'UTF-8//IGNORE', str_replace(chr(209), ',', $title));
+					if( substr($title, 0, 1) == '"' && substr($title, strlen($title) - 1, 1) == '"' )
+						$title = str_replace('""', '"', substr($title, 1, strlen($title) - 2));
                 }
             } elseif( $i > 5 && count($items) > 5 ) {
                 $lat = $items[0];

@@ -2,6 +2,14 @@
 
 Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and `S` is the Share build, independent of the library version. There are no "stable" versions and releases: the latest version is always the one to install.
 
+### 1.1-9, 2013-12-12
+
+* Fixed exporting empty maps and single marker maps to HTML. [#10](https://github.com/MapBBCode/share.mapbbcode.org/issues/10)
+* Exported HTML now uses Leaflet 0.7.1. [#11](https://github.com/MapBBCode/share.mapbbcode.org/issues/11)
+* WPT import uses description field if it's not empty. [#12](https://github.com/MapBBCode/share.mapbbcode.org/issues/12)
+* Quotes in WPT and PLT are now screened, and are read properly.
+* Export tries to create filename out of map title before resorting to code id (sadly, cyrillic letters are dropped).
+
 ### 1.1-8, 2013-12-01
 
 * Updated MapBBCode to 1.1.2.

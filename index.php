@@ -1,6 +1,6 @@
 <?php
 define('IN_MAPBBCODE', 1);
-define('VERSION', '1.1-8');
+define('VERSION', '1.1-9');
 require('config.php');
 require('convert.php');
 require('db.php');
