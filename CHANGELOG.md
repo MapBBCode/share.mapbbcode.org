@@ -9,6 +9,7 @@ Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and
 * WPT import uses description field if it's not empty. [#12](https://github.com/MapBBCode/share.mapbbcode.org/issues/12)
 * Quotes in WPT and PLT are now screened, and are read properly.
 * Export tries to create filename out of map title before resorting to code id (sadly, cyrillic letters are dropped).
+* Increased displayed library size to 100 maps.
 
 ### 1.1-8, 2013-12-01
 

@@ -271,7 +271,7 @@ function fetch_library( $userid ) {
     $db = getdb();
     if( !$db )
         return $codes;
-    $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid = \''.$db->escape_string($userid).'\' order by m.updated desc limit 30';
+    $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid = \''.$db->escape_string($userid).'\' order by m.updated desc limit 100';
     $res = $db->query($sql);
     if( $res ) {
         require_once('mapbbcode.php');
