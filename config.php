@@ -17,4 +17,6 @@
 
     // set this to your timezone or whatever (doesn't really matter)
     date_default_timezone_set('UTC');
+    // this locale is used for transliterating file names and unknown chars for ozi waypoints
+    setlocale(LC_CTYPE, 'en_GB');
 ?>

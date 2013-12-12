@@ -62,7 +62,9 @@ function export( $type, $title, $bbcode, $codeid = '', $break_on_empty = true ) 
         if( count($data['objs']) > 0 || isset($data['zoom']) ) {
             $content = $fmt->export($data);
             if( !$break_on_empty || strlen($content) > 0 ) {
-                $basename = preg_match('/^\w+$/', $codeid) ? $codeid : 'shared';
+                $basename = trim(preg_replace('/[^ 0-9a-z_.,!()-]+/i', '', iconv('UTF-8', 'ASCII//TRANSLIT', $title)));
+                if( $basename == '' )
+                    $basename = preg_match('/^\w+$/', $codeid) ? $codeid : 'shared';
                 header("Cache-Control: no-cache, must-revalidate");
                 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
                 header('Content-Type: '.(isset($fmt->mime) ? $fmt->mime : 'text/plain'));

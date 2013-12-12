@@ -13,7 +13,6 @@ Reserved 3
 
 WPTHEAD;
         $i = 0;
-        setlocale(LC_ALL, 'en_GB');
         foreach( $data['objs'] as $obj ) {
             if( count($obj['coords']) == 1 ) {
                 $i++;
