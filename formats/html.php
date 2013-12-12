@@ -10,16 +10,21 @@ class HTMLFormat implements Format {
         if( strlen($geojson) == 0 )
             return '';
         $title = isset($data['title']) ? htmlspecialchars($data['title']) : 'MapBBCode';
+		$cnt = isset($data['objs']) && $data['objs'] ? count($data['objs']) : 0;
+		if( $cnt == 0 )
+			$fitBounds = isset($data['zoom']) && isset($data['pos']) ? 'map.setView(['.$data['pos'][0].', '.$data['pos'][1].'], '.$data['zoom'].');' : 'map.setView([55, 19], 5);';
+		elseif( $cnt == 1 && isset($data['objs'][0]['coords']) && count($data['objs'][0]['coords']) == 1 ) {
+			$c = $data['objs'][0]['coords'][0];
+			$fitBounds = 'map.setView(['.$c[0].', '.$c[1].'], 16);';
+		} else
+			$fitBounds = 'map.fitBounds(layer.getBounds());';
         $html = <<<HTMLE
 <!DOCTYPE html>
 <html>
 <head>
 <title>$title</title>
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
-<!--[if lte IE 8]>
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.ie.css" />
-<![endif]-->
-<script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.css" />
+<script src="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.js"></script>
 <script>
 // this is a special type of icon. You can remove this class if you don't need it
 L.PopupIcon = L.Icon.extend({
@@ -137,7 +142,7 @@ var layer = L.geoJson(data, {
             layer.options.clickable = false;
     }
 }).addTo(map);
-map.fitBounds(layer.getBounds());
+$fitBounds
 </script>
 </body>
 </html>
