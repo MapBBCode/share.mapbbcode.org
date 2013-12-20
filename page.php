@@ -246,6 +246,7 @@ mapBB.setStrings({ helpContents:
 <?php
 	$helpContents = file_get_contents('help.txt');
 	$helpContents = str_replace('{version}', VERSION, $helpContents);
+	$helpContents = str_replace("\r", '', $helpContents);
 	echo "'".str_replace("'", "\\'", str_replace("\n", "\\n", $helpContents))."'";
 ?>
 });
