@@ -8,14 +8,14 @@ class GPXFormat implements Format {
 
 	private function color_to_garmin( $params ) {
 		foreach( $params as $c ) {
-			if( $c == 'blue' ) return 'DarkBlue';
-			elseif( $c == 'red' ) return 'DarkRed';
-			elseif( $c == 'green' ) return 'DarkGreen';
-			elseif( $c == 'brown' ) return 'DarkYellow';
-			elseif( $c == 'purple' ) return 'DarkMagenta';
+			if( $c == 'blue' ) return 'Blue';
+			elseif( $c == 'red' ) return 'Red';
+			elseif( $c == 'green' ) return 'Green';
+			elseif( $c == 'brown' ) return 'Yellow';
+			elseif( $c == 'purple' ) return 'Magenta';
 			elseif( $c == 'black' ) return 'Black';
 		}
-		return 'DarkBlue';
+		return 'Blue';
 	}
 
 	private function garmin_to_color( $c ) {
