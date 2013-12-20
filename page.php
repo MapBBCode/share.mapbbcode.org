@@ -7,14 +7,9 @@
 <?php $lib = $doc_path.'/lib'; ?>
 <link rel="stylesheet" href="<?=$lib ?>/leaflet.css" />
 <link rel="stylesheet" href="<?=$lib ?>/leaflet.draw.css" />
-<!--[if lte IE 8]>
-    <link rel="stylesheet" href="<?=$lib ?>/leaflet.ie.css" />
-    <link rel="stylesheet" href="<?=$lib ?>/leaflet.draw.ie.css" />
-<![endif]-->
 <script src="<?=$lib ?>/leaflet.js"></script>
 <script src="<?=$lib ?>/leaflet.draw.js"></script>
 <script src="<?=$lib ?>/mapbbcode.js"></script>
-<script src="<?=$lib ?>/StaticLayerSwitcher.js"></script>
 <script src="<?=$lib ?>/Bing.js"></script>
 <script src="<?=$lib ?>/Handler.Simplify.js"></script>
 <script src="<?=$lib ?>/Handler.Length.js"></script>
@@ -243,23 +238,17 @@ var mapBB = new MapBBCode({
     createLayers: function(L) { return [
         L.tileLayer('http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}', { name: 'OpenMapSurfer', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>', minZoom: 0, maxZoom: 18 }),
         L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', { name: 'CycleMap', attribution: 'Map &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | Tiles &copy; <a href=\"http://www.opencyclemap.org\">OpenCycleMap</a>', minZoom: 0, maxZoom: 18 }),
-        MapBBCode.prototype.createOpenStreetMapLayer()
+        MapBBCode.prototype.createOpenStreetMapLayer(L)
         <?php if(defined('BING_KEY') && strlen(BING_KEY) > 0 ) { ?>, new L.BingLayer('<?=BING_KEY ?>', { name: 'Bing Satellite' })<?php } ?>
     ]}
 });
-mapBB.setStrings({ helpContents: [
+mapBB.setStrings({ helpContents: 
 <?php
-	$helpContents = explode("\n", file_get_contents('help.txt'));
+	$helpContents = file_get_contents('help.txt');
 	$helpContents = str_replace('{version}', VERSION, $helpContents);
-	for( $i = 0; $i < count($helpContents); $i++ ) {
-		$line = trim($helpContents[$i]);
-		if( strlen($line) > 0 ) {
-			echo "\t'".str_replace("'", "\\'", $line)."'";
-			echo $i == count($helpContents) - 1 ? "\n" : ",\n";
-		}
-	}
+	echo "'".str_replace("'", "\\'", str_replace("\n", "\\n", $helpContents))."'";
 ?>
-]});
+});
 
 <?php if( $editing ): ?>
 openEditor(bbcode);
@@ -267,14 +256,14 @@ openEditor(bbcode);
 var show = mapBB.show('mapedit', bbcode);
 
 if( typeof editid === 'string' ) {
-    var editBtn = L.functionButton('Edit', { position: 'topleft' });
+    var editBtn = L.functionButtons([{ content: 'Edit' }], { position: 'topleft' });
     editBtn.on('clicked', function() {
         window.location = '<?=$base_path ?>/<?=$scodeid?>/' + editid;
     });
     show.map.addControl(editBtn);
 }
 
-var fork = L.functionButton('Fork', { position: 'topleft' });
+var fork = L.functionButtons([{ content: 'Fork' }], { position: 'topleft' });
 fork.on('clicked', function() {
     show.close();
     document.getElementById('fm').elements['codeid'].value = '';
@@ -282,7 +271,7 @@ fork.on('clicked', function() {
 });
 show.map.addControl(fork);
 
-var bnew = L.functionButton('Create New', { position: 'topleft' });
+var bnew = L.functionButtons([{ content: 'Create New' }], { position: 'topleft' });
 bnew.on('clicked', function() {
     show.close();
     document.getElementById('titleinput').value = '';
@@ -320,20 +309,20 @@ function openEditor( bbcode ) {
     document.getElementById('titleedit').style.display = 'block';
     document.getElementById('title').style.display = 'block';
     var edit = mapBB.editor('mapedit', bbcode);
-    var save = L.functionButton('<span style="font-size: 12pt;">Save</span>', { position: 'topleft' });
+    var save = L.functionButtons([{ content: '<span style="font-size: 12pt;">Save</span>' }], { position: 'topleft' });
     save.on('clicked', function() {
         submit('save', edit);
     });
     edit.map.addControl(save);
-    modifyListener.saveButtonStyle = save._links[0].style;
+    modifyListener.saveButtonStyle = save._buttons[0].link.style;
     edit.map.on('draw:created', modifyListener.modified, modifyListener);
-    var editbb = L.functionButton('Edit Raw', { position: 'topleft' });
+    var editbb = L.functionButtons([{ content: 'Edit Raw' }], { position: 'topleft' });
     editbb.on('clicked', function() {
         openCodeEditor(edit);
     });
     edit.map.addControl(editbb);
 
-    var imprt = L.functionButton('Import', { position: 'topleft' });
+    var imprt = L.functionButtons([{ content: 'Import' }], { position: 'topleft' });
     imprt.on('clicked', function() {
         var field = document.getElementById('fm').elements['file'];
         field.onchange = function() {
@@ -363,7 +352,7 @@ function addImportExport(ui) {
 function addLogin(ui) {
     <?php if( !db_available() ) { ?>return;<?php } ?>
     var loggedIn = <?=isset($userid) ? 'true' : 'false' ?>;
-    var login = L.functionButton(loggedIn ? 'Library' : 'Sign In', { position: 'topright' });
+    var login = L.functionButtons([{ content: loggedIn ? 'Library' : 'Sign In' }], { position: 'topright' });
     login.on('clicked', function() {
         if( loggedIn ) {
             showHistoryWindow(true);
