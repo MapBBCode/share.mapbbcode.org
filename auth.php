@@ -1,9 +1,10 @@
 <?php
 require('openid.php');
 
+$host = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 's' : '').'://'.$_SERVER['HTTP_HOST'];
 $close = false;
 try {
-    $openid = new LightOpenID('http://share.mapbbcode.org'); // host
+    $openid = new LightOpenID($host);
     if( !$openid->mode ) {
         if( isset($_POST['openid_identifier']) ) {
             $openid->identity = $_POST['openid_identifier'];

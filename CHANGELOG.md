@@ -6,6 +6,8 @@ Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and
 
 * `?direct` parameter does not add attachment headers (useful for HTML export).
 * Updated L.PopupIcon in HTML format exporter.
+* Host detection in `auth.php` instead of a hardcoded address. [#15](https://github.com/MapBBCode/share.mapbbcode.org/issues/15)
+* IFrame format. [#17](https://github.com/MapBBCode/share.mapbbcode.org/issues/17)
 
 ### 1.2-10, 2013-12-20
 
