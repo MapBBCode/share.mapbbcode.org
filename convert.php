@@ -52,7 +52,7 @@ function get_format_arrays() {
 }
 
 // parses bbcode and prints exported file. Returns CONVERT_* status
-function export( $type, $title, $bbcode, $codeid = '', $break_on_empty = true ) {
+function export( $type, $title, $bbcode, $codeid = '', $attach = true, $break_on_empty = true ) {
     global $formats;
     if( isset($formats[$type]) ) {
         $fmt = $formats[$type];
@@ -68,7 +68,8 @@ function export( $type, $title, $bbcode, $codeid = '', $break_on_empty = true ) 
                 header("Cache-Control: no-cache, must-revalidate");
                 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
                 header('Content-Type: '.(isset($fmt->mime) ? $fmt->mime : 'text/plain'));
-                header('Content-Disposition: attachment; filename='.$basename.'.'.(isset($fmt->ext) ? $fmt->ext : $type));
+                if( $attach )
+                    header('Content-Disposition: attachment; filename='.$basename.'.'.(isset($fmt->ext) ? $fmt->ext : $type));
                 header('Content-Length: '.mb_strlen($content, '8bit'));
                 print $content;
                 return CONVERT_OK;

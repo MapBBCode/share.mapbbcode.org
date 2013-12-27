@@ -2,6 +2,11 @@
 
 Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and `S` is the Share build, independent of the library version. There are no "stable" versions and releases: the latest version is always the one to install.
 
+### 1.2-11, 2013-12-27
+
+* `?direct` parameter does not add attachment headers (useful for HTML export).
+* Updated L.PopupIcon in HTML format exporter.
+
 ### 1.2-10, 2013-12-20
 
 * Updated MapBBCode to 1.2.0-dev.

@@ -1,6 +1,6 @@
 <?php
 define('IN_MAPBBCODE', 1);
-define('VERSION', '1.2-10');
+define('VERSION', '1.2-11');
 require('config.php');
 require('convert.php');
 require('db.php');
@@ -115,7 +115,7 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
 if( isset($_REQUEST['format']) && preg_match('/^[a-z]+$/', $_REQUEST['format']) ) {
     $format = $_REQUEST['format'];
     header('Access-Control-Allow-Origin: *');
-    $result = export($format, $title, $bbcode, isset($scodeid) ? $scodeid : '');
+    $result = export($format, $title, $bbcode, isset($scodeid) ? $scodeid : '', !isset($_REQUEST['direct']));
     if( $result == CONVERT_OK )
         exit;
     if( $result == CONVERT_NOT_SUPPORTED ) {
