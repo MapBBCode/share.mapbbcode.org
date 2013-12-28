@@ -225,8 +225,8 @@ var bbcode = '<?=screen_param($bbcode) ?>';
 createHistoryBox();
 
 var mapBB = new MapBBCode({
-    defaultPosition: [55, 19],
-    defaultZoom: 5,
+    defaultPosition: [<?=DEFAULT_LAT?>, <?=DEFAULT_LNG?>],
+    defaultZoom: <?=DEFAULT_ZOOM?>,
     maxInitialZoom: 16,
     editorHeight: 0,
     fullViewHeight: 0,

@@ -15,8 +15,12 @@
     //const MOD_REWRITE = true; // set to explicit value if autodetection is wrong
     const OZI_CHARSET = 'CP1251'; // charset for OziExplorer formats, UTF-8 by default
 
+    // define the default map position
+    const DEFAULT_LAT = 55;
+    const DEFAULT_LNG = 19;
+    const DEFAULT_ZOOM = 5;
+
     // set this to your timezone or whatever (doesn't really matter)
     date_default_timezone_set('UTC');
     // this locale is used for transliterating file names and unknown chars for ozi waypoints
     setlocale(LC_CTYPE, 'en_GB');
-?>
