@@ -2,6 +2,12 @@
 
 Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and `S` is the Share build, independent of the library version. There are no "stable" versions and releases: the latest version is always the one to install.
 
+### 1.2-12, 2013-12-28
+
+* Support for nginx with php-fpm (by [@aaronpk](https://github.com/aaronpk)). [#20](https://github.com/MapBBCode/share.mapbbcode.org/pull/20)
+* Swap MyOpenID for Vkontakte OpenID provider. [#21](https://github.com/MapBBCode/share.mapbbcode.org/issues/21)
+* Fix paths to `auth.php` for cases when Share is not in a root directory.
+
 ### 1.2-11, 2013-12-27
 
 * `?direct` parameter does not add attachment headers (useful for HTML export).

@@ -2,6 +2,7 @@
 require('openid.php');
 
 $host = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 's' : '').'://'.$_SERVER['HTTP_HOST'];
+$phpself = $host.rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\').'/auth.php';
 $close = false;
 try {
     $openid = new LightOpenID($host);
@@ -26,7 +27,7 @@ try {
 
 <body>
     <h1>Login to MapBBCode Share with OpenID</h1>
-    <form action="/auth.php" method="post" id="openid_form">
+	<form action="<?php echo $phpself ?>" method="post" id="openid_form">
         <input id="openid_form_submit" type="submit" style="display: none;" />
         <div id="openid_choice">
             <p>Please click your account provider:</p>

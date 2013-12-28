@@ -359,7 +359,7 @@ function addLogin(ui) {
             showHistoryWindow(true);
         } else {
             window.storedBBCode = ui.getBBCode();
-            window.open('/auth.php', 'mapbbauth', 'dialog,resizable,width=700,height=400');
+			window.open('<?php echo $base_path ?>/auth.php', 'mapbbauth', 'dialog,resizable,width=700,height=400');
         }
     });
     ui.map.addControl(login);
