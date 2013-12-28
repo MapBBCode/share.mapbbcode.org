@@ -20,6 +20,17 @@
     const DEFAULT_LNG = 19;
     const DEFAULT_ZOOM = 5;
 
+    // tile layers are configured as a line of Javascript 
+    $TILE_LAYERS = array(
+        'L.tileLayer("http://openmapsurfer.uni-hd.de/tiles/roads/x={x}&y={y}&z={z}", { name: "OpenMapSurfer", attribution: \'Map &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | Tiles &copy; <a href=\"http://giscience.uni-hd.de/\">GIScience Heidelberg</a>\', minZoom: 0, maxZoom: 18 })',
+        'L.tileLayer("http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png", { name: "CycleMap", attribution: \'Map &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | Tiles &copy; <a href=\"http://www.opencyclemap.org\">OpenCycleMap</a>\', minZoom: 0, maxZoom: 18 })',
+        'MapBBCode.prototype.createOpenStreetMapLayer(L)',
+        'L.tileLayer("http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png", { name: "MapQuest Open", attribution: \'Map &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, Tiles &copy; <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" />\', subdomains: "1234" } )',
+        'L.tileLayer("http://otile{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png", { name: "MapQuest Aerial", attribution: \'Imagery &copy; NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency, Tiles &copy; <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" />\', subdomains: "1234" } )',
+    );
+    if(defined('BING_KEY') && strlen(BING_KEY) > 0)
+        $TILE_LAYERS[] = 'new L.BingLayer("' . BING_KEY . '", { name: "Bing Satellite" })';
+
     // set this to your timezone or whatever (doesn't really matter)
     date_default_timezone_set('UTC');
     // this locale is used for transliterating file names and unknown chars for ozi waypoints
