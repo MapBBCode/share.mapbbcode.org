@@ -1,18 +1,18 @@
 <?php
 define('IN_MAPBBCODE', 1);
-define('VERSION', '1.2-11');
+define('VERSION', '1.2-12');
 require('config.php');
 require('convert.php');
 require('db.php');
 
 define('SCRIPT_NAME', 'index.php');
-if( function_exists('apache_get_modules') ) {
-    if( !defined('MOD_REWRITE') )
-        define('MOD_REWRITE', in_array('mod_rewrite', apache_get_modules()) && file_exists('.htaccess'));
-} else {
-    if( !defined('MOD_REWRITE') )
-        define('MOD_REWRITE', true); // true for nginx
+if( !defined('MOD_REWRITE') ) {
+	if( function_exists('apache_get_modules') )
+		define('MOD_REWRITE', in_array('mod_rewrite', apache_get_modules()) && file_exists('.htaccess'));
+	else
+		define('MOD_REWRITE', true); // true for nginx
 }
+
 $doc_path = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 's' : '').'://'.
     $_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $base_path = MOD_REWRITE ? $doc_path : $doc_path.'/'.SCRIPT_NAME;
