@@ -225,26 +225,27 @@ var bbcode = '<?=screen_param($bbcode) ?>';
 createHistoryBox();
 
 var mapBB = new MapBBCode({
-    defaultPosition: [<?=DEFAULT_LAT?>, <?=DEFAULT_LNG?>],
-    defaultZoom: <?=DEFAULT_ZOOM?>,
+<?php if( defined('DEFAULT_LAT') ) { echo "\tdefaultPosition: [".DEFAULT_LAT.', '.DEFAULT_LNG."],\n\tdefaultZoom: ".DEFAULT_ZOOM.",\n"; } ?>
     maxInitialZoom: 16,
     editorHeight: 0,
     fullViewHeight: 0,
     fullFromStart: true,
     editorCloseButtons: false,
     preferStandardLayerSwitcher: false,
-    leafletOptions: { scrollWheelZoom: true, minZoom: 3, maxZoom: 18, attributionEditLink: true },
     measureButton: true,
+<?php if( isset($TILE_LAYERS) ): ?>
     createLayers: function(L) { return [
-        <?= implode(",\n\t", $TILE_LAYERS) . "\n" ?>
-    ]}
+        <?= implode(",\n\t", $TILE_LAYERS)."\n" ?>
+    ]},
+<?php endif ?>
+    leafletOptions: { scrollWheelZoom: true, minZoom: 3, maxZoom: 18, attributionEditLink: true }
 });
 mapBB.setStrings({ helpContents: 
 <?php
-	$helpContents = file_get_contents('help.txt');
-	$helpContents = str_replace('{version}', VERSION, $helpContents);
-	$helpContents = str_replace("\r", '', $helpContents);
-	echo "'".str_replace("'", "\\'", str_replace("\n", "\\n", $helpContents))."'";
+    $helpContents = file_get_contents('help.txt');
+    $helpContents = str_replace('{version}', VERSION, $helpContents);
+    $helpContents = str_replace("\r", '', $helpContents);
+    echo "'".str_replace("'", "\\'", str_replace("\n", "\\n", $helpContents))."'";
 ?>
 });
 
@@ -356,7 +357,7 @@ function addLogin(ui) {
             showHistoryWindow(true);
         } else {
             window.storedBBCode = ui.getBBCode();
-			window.open('<?php echo $base_path ?>/auth.php', 'mapbbauth', 'dialog,resizable,width=700,height=400');
+            window.open('<?php echo $base_path ?>/auth.php', 'mapbbauth', 'dialog,resizable,width=700,height=400');
         }
     });
     ui.map.addControl(login);
