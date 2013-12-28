@@ -4,6 +4,7 @@ Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and
 
 ### 1.2-12, 2013-12-28
 
+* Move default position, zoom and layers to `config.php` (by [@aaronpk](https://github.com/aaronpk)). [#23](https://github.com/MapBBCode/share.mapbbcode.org/pull/23)
 * Support for nginx with php-fpm (by [@aaronpk](https://github.com/aaronpk)). [#20](https://github.com/MapBBCode/share.mapbbcode.org/pull/20)
 * Swap MyOpenID for Vkontakte OpenID provider. [#21](https://github.com/MapBBCode/share.mapbbcode.org/issues/21)
 * Fix paths to `auth.php` for cases when Share is not in a root directory.
