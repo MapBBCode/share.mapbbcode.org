@@ -6,7 +6,7 @@ This is a website originally made for sharing maps, based on [MapBBCode](https:/
 
 In order to reduce load on the main [share.mapbbcode.org](http://share.mapbbcode.org) website, cloning the service is encouraged. Requirements are few:
 
-* Apache with mod_rewrite
+* Apache with mod_rewrite or nginx with php-fpm
 * PHP 5.2 or newer
 * MySQL 5
 * A separate domain (or subdomain) name

@@ -6,8 +6,13 @@ require('convert.php');
 require('db.php');
 
 define('SCRIPT_NAME', 'index.php');
-if( !defined('MOD_REWRITE') )
-    define('MOD_REWRITE', in_array('mod_rewrite', apache_get_modules()) && file_exists('.htaccess'));
+if( function_exists('apache_get_modules') ) {
+    if( !defined('MOD_REWRITE') )
+        define('MOD_REWRITE', in_array('mod_rewrite', apache_get_modules()) && file_exists('.htaccess'));
+} else {
+    if( !defined('MOD_REWRITE') )
+        define('MOD_REWRITE', true); // true for nginx
+}
 $doc_path = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 's' : '').'://'.
     $_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $base_path = MOD_REWRITE ? $doc_path : $doc_path.'/'.SCRIPT_NAME;
@@ -381,7 +386,12 @@ function build_url( $action, $codeid = '', $editid = '' ) {
 // returns array(action, id?, key?)
 function parse_surl() {
     $base_path = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-    $url = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : $_SERVER['PHP_SELF'];
+
+    if(function_exists('apache_request_headers'))
+        $url = isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : $_SERVER['PHP_SELF'];
+    else
+        $url = $_SERVER['REQUEST_URI']; // under nginx, path info is in REQUEST_URI
+
     if( substr($url, 0, strlen($base_path)) == $base_path )
         $url = substr($url, strlen($base_path));
     if( substr($url, 1, strlen(SCRIPT_NAME)) == SCRIPT_NAME )
