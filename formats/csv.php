@@ -46,7 +46,7 @@ class CSVFormat implements Format {
             $line = $i > 0 ? $lines[--$i] : fgets($file, 1000);
             if( $line === false )
                 break;
-            $fields = explode($format['separator'], $line);
+            $fields = $this->explode_quoted($format['separator'], $line);
             if( count($fields) != $format['fields'] )
                 continue;
             // remove quotes and trim
@@ -86,9 +86,8 @@ class CSVFormat implements Format {
                 $numeric = array();
                 $i = 0;
                 foreach( $lines as $line ) {
-                    $f = explode($delim, $line);
+                    $f = $this->explode_quoted($delim, $line);
                     $cnt = count($f);
-
                     // check 1: field count is constant
                     if( !$fields )
                         $fields = $cnt;
@@ -131,7 +130,8 @@ class CSVFormat implements Format {
 
         // we now have correct $maxdelim, $maxdec, $maxfields and $maxllpos
         // check the first line: if it is a header, then in $maxllpos there might be a hint at "lon,lat" order
-        if( stripos($lines[0][$maxllpos], 'lon') === false ) {
+        $header = $this->explode_quoted($maxdelim, $lines[0]);
+        if( stripos($header[$maxllpos], 'lon') === false ) {
             $latpos = $maxllpos;
             $lonpos = $maxllpos + 1;
         } else {
@@ -159,7 +159,7 @@ class CSVFormat implements Format {
                 foreach( $lines as $line ) {
                     if( ++$i == 1 )
                         continue; // skip possible header
-                    $fields = explode($maxdelim, $line);
+                    $fields = $this->explode_quoted($maxdelim, $line);
                     for( $j = 0; $j < count($fields); $j++ ) {
                         $field = $fields[$j];
                         if( preg_match('/^\s*"?(.*?)"?\s*$/', $field, $m) )
@@ -218,6 +218,53 @@ class CSVFormat implements Format {
             $result['titlepos'] = $titlepos;
         }
 
+        return $result;
+    }
+
+    // like explode(), but treats text in quotes as a whole (and removes quotes).
+    // extra spaces are not preserved.
+    private function explode_quoted($delim, $line) {
+        $result = array();
+        $len = strlen($line);
+        $start = 0;
+        while( $start < $len ) {
+            while( $start < $len && $line[$start] === ' ' ) {
+                $start++;
+            }
+            if( $start < $len && $line[$start] === '"' ) {
+                $quotes = $start;
+                $start++;
+            } else
+                $quotes = -1;
+            // we found the first character
+            $end = $start; // last non-whitespace char
+            $cur = $end; // current char that we are testing
+            $after_quote = $quotes < 0 ? true : false;
+            while( $cur < $len ) {
+                if( $line[$cur] === $delim && $after_quote )
+                    break;
+                if( $line[$cur] === '"' ) {
+                    $cur++;
+                    if( $line[$cur] === '"' ) {
+                        $end = $cur;
+                        $cur++;
+                    } elseif( !$after_quote ) {
+                        $end = $cur - 2;
+                        $after_quote = true;
+                    }
+                } else {
+                    if( $line[$cur] !== ' ' )
+                        $end = $cur;
+                    $cur++;
+                }
+            }
+            // ok, now cut the value
+            $result[] = $start < $len ? substr($line, $start, $end-$start+1) : '';
+            // next entry (cur points at a delimiter)
+            $start = $cur + 1;
+            if( $start == $len )
+                $result[] = ''; // empty value at the tail
+        }
         return $result;
     }
 }

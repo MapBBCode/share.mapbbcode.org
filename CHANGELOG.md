@@ -2,6 +2,10 @@
 
 Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and `S` is the Share build, independent of the library version. There are no "stable" versions and releases: the latest version is always the one to install.
 
+### 1.2-13, 2014-03-06
+
+* Fix processing of delimiters inside quotes for CSV.
+
 ### 1.2-12, 2013-12-28
 
 * Move default position, zoom and layers to `config.php` (by [@aaronpk](https://github.com/aaronpk)). [#23](https://github.com/MapBBCode/share.mapbbcode.org/pull/23)
