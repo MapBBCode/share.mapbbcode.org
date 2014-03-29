@@ -26,7 +26,7 @@ function getSquareSegmentDistance($p, $p1, $p2) {
 	$dx = $p2[0] - $x;
 	$dy = $p2[1] - $y;
 
-	if ($dx !== 0 || $dy !== 0) {
+	if (abs($dx) + abs($dy) > 0.000001) {
 
 		$t = (($p[0] - $x) * $dx + ($p[1] - $y) * $dy) / ($dx * $dx + $dy * $dy);
 
@@ -76,6 +76,8 @@ function simplifyRadialDistance($points, $sqTolerance) { // distance-based simpl
 function simplifyDouglasPeucker($points, $sqTolerance) {
 
 	$len = count($points);
+	if( $len <= 1 )
+		return $points;
 
 	$markers = array_fill ( 0 , $len - 1, null);
 	$first = 0;

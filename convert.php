@@ -59,6 +59,8 @@ function export( $type, $title, $bbcode, $codeid = '', $attach = true, $break_on
         require_once('mapbbcode.php');
         $data = mapbbcode_to_array($bbcode);
         $data['title'] = $title;
+		if( !is_array($data['objs']) )
+			$data['objs'] = array();
         if( count($data['objs']) > 0 || isset($data['zoom']) ) {
             $content = $fmt->export($data);
             if( !$break_on_empty || strlen($content) > 0 ) {

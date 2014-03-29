@@ -106,7 +106,7 @@ class GPXFormat implements Format {
                     if( $mode == 'wpt' || $mode == 'trkseg' || $mode == 'rte' || $mode == 'trk' ) {
 						if( isset($coords) && count($coords) > 0 ) {
 							$cnt = count($coords);
-							if( count($coords) > 2 && $coords[0][0] == $coords[$cnt][0] && $coords[0][1] == $coords[$cnt][1] )
+							if( count($coords) > 2 && $coords[0][0] == $coords[$cnt-1][0] && $coords[0][1] == $coords[$cnt-1][1] )
 								array_pop($coords);
                             $obj = array('coords' => $coords);
                             if( isset($objtext) )
