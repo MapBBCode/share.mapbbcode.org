@@ -11,9 +11,7 @@ In order to reduce load on the main [share.mapbbcode.org](http://share.mapbbcode
 * MySQL 5
 * A separate domain (or subdomain) name
 
-Scripts and `.htaccess` file expect that they are placed in a root directory. That is, at `http://any.domain.name/index.php`. If that's not your case, a pull request relaxing this requirement would be welcome.
-
-To install, copy all files (except `README.md`) to a document root, modify `config.php` according to your setup, and open `http://domain.name/initdb`. If you see a map with a yellow message saying tables were created, you're good to go. Set `NEED_INIT_DB` in the config to `false`, then check that saving and signing in work.
+To install, copy all files (except `README.md`) to a designated directory, modify `config.php` according to your setup, and open `http://domain.name/initdb`. If you see a map with a yellow message saying tables were created, you're good to go. Set `NEED_INIT_DB` in the config to `false`, then check that saving and signing in work.
 
 For caching to work, you need a `cache` directory with writing rights.
 
