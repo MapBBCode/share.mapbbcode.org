@@ -28,7 +28,7 @@ PLTHEAD;
                 }
             }
         }
-        $out .= count($pts)."\n".implode("\n", $pts)."\n";
+        $out .= "\n".count($pts)."\n".implode("\n", $pts)."\n";
         return $out;
     }
 
