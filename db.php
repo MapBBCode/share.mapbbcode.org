@@ -53,6 +53,16 @@ CREATE TABLE $table (
 CSQL2;
             $res = $db->query($sql);
         }
+        if( $res ) {
+            $table = DB_TABLE.'_usermap';
+            $sql = <<<CSQL3
+CREATE TABLE $table (
+    userid varchar(250) not null, primary key
+    puserid varchar(250) not null
+) DEFAULT CHARACTER SET utf8
+CSQL3;
+            $res = $db->query($sql);
+        }
         if( !$res )
             $message = 'Failed to create table '.$table.': '.$db->error;
         else

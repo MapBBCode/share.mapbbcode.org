@@ -204,6 +204,7 @@
     <input type="button" id="historycancel" value="Close">
     <input type="button" id="historyadd" value="Add current map">
     <input type="button" id="signout" value="Sign out">
+    <input type="button" id="altlogin" value="Merge account">
 </div>
 </div>
 
@@ -366,6 +367,10 @@ function addLogin(ui) {
     };
     document.getElementById('signout').onclick = function() {
         submit('signout', ui);
+    };
+    document.getElementById('altlogin').onclick = function() {
+        window.storedBBCode = ui.getBBCode();
+        window.open('<?php echo $base_path ?>/auth.php', 'mapbbauth', 'dialog,resizable,width=700,height=400');
     };
 }
 

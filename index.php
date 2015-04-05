@@ -24,8 +24,13 @@ session_start();
 
 //if( $_SERVER['HTTP_HOST'] == 'localhost' ) $userid = 'test';
 
-if( isset($_SESSION['user_id']) )
+if( isset($_SESSION['user_id']) ) {
     $userid = $_SESSION['user_id'];
+    if( isset($_SESSION['alt_user_id']) ) {
+        check_alt_user_id($userid, $_SESSION['alt_user_id']);
+        unset($_SESSION['alt_user_id']);
+    }
+}
 
 $message = '';
 $api = isset($_REQUEST['api']);
@@ -256,14 +261,47 @@ function remove_bookmark( $userid, $codeid ) {
     $db = getdb();
     if( !$db )
         return false;
-    $uidesc = $db->escape_string($userid);
-    $sql = 'delete from '.DB_TABLE."_users where codeid = '$codeid' and userid = '$uidesc'";
+    $sql = 'delete from '.DB_TABLE."_users where codeid = '$codeid' and userid ".get_alt_userid_clause($userid);
     $res = $db->query($sql);
     if( $res && $db->affected_rows > 0 ) {
         cache_remove($userid, 'user');
         return true;
     }
     return false;
+}
+
+// Merges two user accounts
+function check_alt_user_id( $userid, $alt_userid ) {
+    $db = getdb();
+    if( !$db )
+        return;
+    $uidesc = $db->escape_string($userid);
+    $alt_uidesc = $db->escape_string($alt_userid);
+    $sql = 'select * from '.DB_TABLE."_usermap where (userid = '$uidesc' and puserid = '$alt_uidesc') or (userid = '$alt_uidesc' and puserid = '$uidesc')";
+    $res = $db->query($sql);
+    if( !$res )
+        return;
+    if( !$res->num_rows ) {
+        $sql = 'insert into '.DB_TABLE."_usermap (userid, puserid) values ('$alt_uidesc', '$uidesc')";
+        $db->query($sql);
+    }
+    cache_remove($userid, 'user');
+    cache_remove($alt_userid, 'user');
+}
+
+// Updates user clause for merged accounts
+function get_alt_userid_clause( $db, $userid ) {
+    $esc_userid = $db->escape_string($userid);
+    $sql = 'select userid from '.DB_TABLE."_usermap where puserid = '$esc_userid' union select puserid as userid from ".DB_TABLE."_usermap where userid = '$esc_userid'";
+    $res = $db->query($sql);
+    $ids = array("'$esc_userid'");
+    if( $res )
+        while( $row = $res->fetch_row() )
+            $ids[] = "'".$db->escape_string($row[0])."'";
+    if( count($ids) == 1 )
+        return '= '.$ids[0];
+    else
+        return 'in ('.implode(',', $ids).')';
 }
 
 // Returns as array of all library entries sorted by update time
@@ -277,7 +315,8 @@ function fetch_library( $userid ) {
     $db = getdb();
     if( !$db )
         return $codes;
-    $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid = \''.$db->escape_string($userid).'\' order by m.updated desc limit 100';
+    $user_clause = get_alt_userid_clause($db, $userid);
+    $sql = 'select now() as now, m.*, u.editable from '.DB_TABLE.' m, '.DB_TABLE.'_users u where u.codeid = m.codeid and u.userid '.$user_clause.' order by m.updated desc limit 100';
     $res = $db->query($sql);
     if( $res ) {
         require_once('mapbbcode.php');
