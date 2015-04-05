@@ -2,6 +2,14 @@
 
 Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and `S` is the Share build, independent of the library version. There are no "stable" versions and releases: the latest version is always the one to install.
 
+### 1.2-14, 2015-04-06
+
+* Option to remove maps from libraries. [#5](https://github.com/MapBBCode/share.mapbbcode.org/pull/5)
+* A button in the library pane to merge accounts. [#43](https://github.com/MapBBCode/share.mapbbcode.org/pull/43)
+* More obvious editing link. [#24](https://github.com/MapBBCode/share.mapbbcode.org/pull/24)
+* Made iframe option visible under "Embed" link. [#41](https://github.com/MapBBCode/share.mapbbcode.org/pull/41)
+* A warning message about Google retiring its OpenID.
+
 ### 1.2-13, 2014-03-06
 
 * Fix processing of delimiters inside quotes for CSV.

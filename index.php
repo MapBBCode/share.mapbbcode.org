@@ -1,6 +1,6 @@
 <?php
 define('IN_MAPBBCODE', 1);
-define('VERSION', '1.2-13');
+define('VERSION', '1.2-14');
 require('config.php');
 require('convert.php');
 require('db.php');
@@ -157,6 +157,9 @@ if( !$editing && strlen($bbcode) < 11 )
 
 if( isset($userid) )
     $library = fetch_library($userid);
+
+if( isset($userid) && !isset($scodeid) )
+    $message .= 'Warning: Google retires its OpenID on April 20th, merge your account with another one to keep your library.';
 
 require('page.php');
 
