@@ -1,7 +1,9 @@
 <?php
 
 class IFrameFormat implements Format {
+    public $title = 'Embed';
     public $mime = 'text/html';
+    public $can_attach = false;
 
     public function export( $data ) {
         global $scodeid, $base_path;
@@ -17,6 +19,7 @@ class IFrameFormat implements Format {
 <html>
 <head>
 <title>$title</title>
+<meta charset="utf-8">
 <link rel="stylesheet" href="//cdn.jsdelivr.net/mapbbcode/$version/leaflet.css" />
 <script src="//cdn.jsdelivr.net/mapbbcode/$version/leaflet.js"></script>
 <script src="//cdn.jsdelivr.net/mapbbcode/$version/mapbbcode.js"></script>
@@ -38,11 +41,11 @@ html, body, #map { margin: 0; height: 100%; }
 }
 </style>
 </head>
-<body>
+<body onload="init();">
 <div id="map"></div>
 $title
 <script>
-L.DomEvent.on(window, 'load', function() {
+function init() {
     var code = $code;
     var map = new window.MapBBCode({
         fullFromStart: true,
@@ -67,7 +70,7 @@ L.DomEvent.on(window, 'load', function() {
             codeid: '$codeid'
         }));
     }
-});
+}
 </script>
 </body>
 </html>

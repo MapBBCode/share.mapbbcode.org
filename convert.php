@@ -70,7 +70,7 @@ function export( $type, $title, $bbcode, $codeid = '', $attach = true, $break_on
                 header("Cache-Control: no-cache, must-revalidate");
                 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
                 header('Content-Type: '.(isset($fmt->mime) ? $fmt->mime : 'text/plain'));
-                if( $attach )
+                if( $attach && $fmt->can_attach )
                     header('Content-Disposition: attachment; filename='.$basename.'.'.(isset($fmt->ext) ? $fmt->ext : $type));
                 header('Content-Length: '.mb_strlen($content, '8bit'));
                 print $content;
