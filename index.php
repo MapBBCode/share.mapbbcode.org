@@ -69,7 +69,7 @@ if( $action == '' && $data && !$params['post'] ) {
 if( $data && isset($params['key']) && $params['key'] == $data['editid'] ) {
     $newcode = false;
     $seditid = $params['key'];
-    $message = '<b><a href="'.$base_path.'/'.$params['id'].'" target="mapbbstatic">Share this link</a></b> for read-only view of this map.<br><a href="'.$base_path.'/'.$params['id'].'/'.$params['key'].'">Bookmark this</a> to edit the map later';
+    $message = '<b><a href="'.$base_path.'/'.$params['id'].'" target="mapbbstatic">Share this link</a></b> for read-only view of this map.<br><a href="'.$base_path.'/'.$params['id'].'?editid='.$params['key'].'">Bookmark this</a> to edit the map later';
     $nohide = 1; // do not hide message
     if( isset($userid) ) {
         update_library($userid, $scodeid, $seditid);
@@ -413,8 +413,8 @@ function parse_params() {
         // todo: remove 4 after mid-december?
         $result['codeid'] = $_POST['codeid'];
         $result['id'] = $result['codeid']; // POST overrides GET
-    } if( isset($_POST['editid']) && preg_match('/^[a-z]+$/', $_POST['editid']) ) {
-        $result['editid'] = $_POST['editid'];
+    } if( isset($_REQUEST['editid']) && preg_match('/^[a-z]+$/', $_REQUEST['editid']) ) {
+        $result['editid'] = $_REQUEST['editid'];
         $result['key'] = $result['editid'];
     }
     $result['title'] = trim(isset($_POST['title']) && strlen($_POST['title']) > 0 ? $_POST['title'] : (!isset($result['codeid']) && isset($_GET['title']) ? $_GET['title'] : ''));

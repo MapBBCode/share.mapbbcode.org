@@ -194,7 +194,7 @@
 <div id="histlistcontainer">
     <div id="historylist">
     <div class="history-entry">
-    $$<div class="edit"><a href="<?=$base_path ?>/{codeid}/{editid}">edit</a></div>$$
+    $$<div class="edit"><a href="<?=$base_path ?>/{codeid}?editid={editid}">edit</a></div>$$
     <div class="date">{updated}</div>
     <div class="title"><a href="<?=$base_path ?>/{codeid}" target="mapnew">{title}</a></div>
     </div>
