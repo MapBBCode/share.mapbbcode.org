@@ -158,6 +158,14 @@
         float: right;
         font-size: 10pt;
     }
+    .history-entry .delete {
+        float: right;
+        font-size: 10pt;
+        padding-right: 1em;
+    }
+    .history-entry .delete a {
+        color: #bbf;
+    }
     .history-entry .title {
         clear: both;
     }
@@ -195,6 +203,7 @@
     <div id="historylist">
     <div class="history-entry">
     $$<div class="edit"><a href="<?=$base_path ?>/{codeid}?editid={editid}">edit</a></div>$$
+    <div class="delete"><a href="<?=$base_path ?>/forget?codeid={codeid}">del</a></div>
     <div class="date">{updated}</div>
     <div class="title"><a href="<?=$base_path ?>/{codeid}" target="mapnew">{title}</a></div>
     </div>

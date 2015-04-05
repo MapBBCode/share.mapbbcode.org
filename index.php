@@ -97,6 +97,10 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
 } elseif( $action == 'save' ) {
     save($params, $data);
 
+} elseif( $action == 'forget' && isset($userid) && isset($scodeid) ) {
+    if( remove_bookmark($userid, $scodeid) )
+        $message .= 'This map has been removed from your library.';
+
 } elseif( $action == 'signout' ) {
     unset($_SESSION['user_id']);
     unset($userid);
@@ -261,7 +265,7 @@ function remove_bookmark( $userid, $codeid ) {
     $db = getdb();
     if( !$db )
         return false;
-    $sql = 'delete from '.DB_TABLE."_users where codeid = '$codeid' and userid ".get_alt_userid_clause($userid);
+    $sql = 'delete from '.DB_TABLE."_users where codeid = '$codeid' and userid ".get_alt_userid_clause($db, $userid);
     $res = $db->query($sql);
     if( $res && $db->affected_rows > 0 ) {
         cache_remove($userid, 'user');
@@ -437,7 +441,7 @@ function parse_surl() {
         $url = substr($url, strlen(SCRIPT_NAME) + 1);
 
     $result = array('action' => '');
-    $actions = array('initdb', 'fmtlist', 'save', 'signout', 'bookmark', 'import', 'export');
+    $actions = array('initdb', 'fmtlist', 'save', 'signout', 'bookmark', 'import', 'export', 'forget');
     if( preg_match('#^/?([a-z]+)(?:/([a-z]+))?/?#', $url, $m) ) {
         $result[in_array($m[1], $actions) ? 'action' : 'id'] = $m[1];
         $result['key'] = count($m) > 2 ? $m[2] : '';
@@ -448,9 +452,8 @@ function parse_surl() {
 // returns array(action, id?, key?, codeid?, editid?, title, bbcode)
 function parse_params() {
     $result = parse_surl();
-    if( isset($_POST['codeid']) && preg_match('/^[a-z]+$/', $_POST['codeid']) && (strlen($_POST['codeid']) == HASH_LENGTH || strlen($_POST['codeid'] == 4)) ) {
-        // todo: remove 4 after mid-december?
-        $result['codeid'] = $_POST['codeid'];
+    if( isset($_REQUEST['codeid']) && preg_match('/^[a-z]+$/', $_REQUEST['codeid']) && strlen($_REQUEST['codeid']) == HASH_LENGTH ) {
+        $result['codeid'] = $_REQUEST['codeid'];
         $result['id'] = $result['codeid']; // POST overrides GET
     } if( isset($_REQUEST['editid']) && preg_match('/^[a-z]+$/', $_REQUEST['editid']) ) {
         $result['editid'] = $_REQUEST['editid'];
