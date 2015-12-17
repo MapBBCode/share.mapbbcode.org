@@ -57,7 +57,7 @@ CSQL2;
             $table = DB_TABLE.'_usermap';
             $sql = <<<CSQL3
 CREATE TABLE $table (
-    userid varchar(250) not null, primary key
+    userid varchar(250) not null primary key,
     puserid varchar(250) not null
 ) DEFAULT CHARACTER SET utf8
 CSQL3;
