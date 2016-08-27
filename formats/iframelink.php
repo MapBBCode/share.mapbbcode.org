@@ -1,6 +1,6 @@
 <?php
 
-class IFrameLinkFormat implements Format {
+class IFrameCodeFormat implements Format {
     public $title = 'IFRAME';
     public $mime = 'text/html';
     public $can_attach = false;
@@ -30,4 +30,4 @@ class IFrameLinkFormat implements Format {
     }
 }
 
-$formats['iframelink'] = new IFrameLinkFormat();
+$formats['iframecode'] = new IFrameCodeFormat();
