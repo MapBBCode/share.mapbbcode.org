@@ -17,7 +17,7 @@ class IFrameCodeFormat implements Format {
         $html = 
 '<!DOCTYPE html><html><head><title>IFRAME export</title><meta charset="utf-8"></head><body>'.
 '<p>If you would like to link to this route, just copy the code and past it into your source code:</p>'.
-'<p><code>'.htmlspecialchars($iframe).'</code></p>'.
+'<p><textarea readonly onclick="this.focus();this.select();" style="width: 100%;">'.htmlspecialchars($iframe).'</textarea></p>'.
 '</body></html>';
         return $html;
     }
