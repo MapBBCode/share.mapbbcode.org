@@ -54,7 +54,7 @@ function mapbbcode_stats( $bbcode ) {
 
 function mapbbcode_to_array( $bbcode ) {
     $re = get_mapbbcode_regexp();
-    $result = array('objs' => '');
+    $result = array();
     if( !preg_match('/'.$re['map'].'/', $bbcode, $m ) )
         return $result;
 
