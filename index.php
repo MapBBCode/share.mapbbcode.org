@@ -1,6 +1,6 @@
 <?php
 define('IN_MAPBBCODE', 1);
-define('VERSION', '1.2-14');
+define('VERSION', '1.2-15');
 require('config.php');
 require('convert.php');
 require('db.php');
@@ -226,7 +226,7 @@ function save( $params, $data ) {
         if( !$res ) {
             $message = 'Failed to insert entry in the database: '.$db->error;
         } else {
-            header("Location: ".$base_path."/$codeid/$editid");
+            header("Location: ".$base_path."/$codeid?editid=$editid");
             exit;
         }
     } else {

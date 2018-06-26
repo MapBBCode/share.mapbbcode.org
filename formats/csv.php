@@ -24,7 +24,7 @@ class CSVFormat implements Format {
 
     public function test( $header ) {
         $lines = preg_split('/[\r\n]+/', $header);
-        if( count($lines) > 3 )
+        if( count($lines) > 4 && strlen($header) > 1800 )
             array_pop($lines); // header is most likely incomplete
         return $this->find_format($lines) !== false;
     }
@@ -33,17 +33,17 @@ class CSVFormat implements Format {
         // cache some lines to determine CSV format
         $lines = array();
         for( $i = 0; $i < 20; $i++ ) {
-            $line = fgets($file, 1000);
+            $line = fgets($file, 2000);
             if( $line )
                 $lines[] = $line;
         }
         $format = $this->find_format($lines);
-        //print_r($format);
+        // print_r($format);
         if( $format === false )
             return false;
         $i = count($lines);
         while(true) {
-            $line = $i > 0 ? $lines[--$i] : fgets($file, 1000);
+            $line = $i > 0 ? $lines[--$i] : fgets($file, 2000);
             if( $line === false )
                 break;
             $fields = $this->explode_quoted($format['separator'], $line);
@@ -80,6 +80,7 @@ class CSVFormat implements Format {
         $delimiters = array(',', ';', "\t");
         $decimals = array('.', ',');
         $maxfields = 0;
+        $field_skips = 0;
         foreach( $decimals as $dec ) {
             foreach( $delimiters as $delim ) {
                 $fields = 0;
@@ -92,8 +93,12 @@ class CSVFormat implements Format {
                     if( !$fields )
                         $fields = $cnt;
                     elseif( $fields != $cnt ) {
-                        $fields = 0;
-                        break;
+                        if (++$field_skips > 1) {
+                            $fields = 0;
+                            break;
+                        } else {
+                            continue;
+                        }
                     }
 
                     if( ++$i > 1 ) {
@@ -101,20 +106,16 @@ class CSVFormat implements Format {
                         // we expect two consequentical numeric fields with at least 0.01 precision (100 m)
                         for( $j = 0; $j < $cnt; $j++ ) {
                             $isnum = preg_match('/^\s*"?-?\d+'.($dec == '.' ? '\.' : $dec).'\d{2,}"?\s*$/', $f[$j]);
-                            if( $i == 2 ) {
-                                // create hash
-                                if( $isnum )
-                                    $numeric[$j] = 1;
-                            } else {
-                                if( isset($numeric[$j]) && !$isnum )
-                                    unset($numeric[$j]);
-                            }
+                            if ($isnum && (!isset($numeric[$j]) || $numeric[$j] !== false))
+                                $numeric[$j] = isset($numeric[$j]) ? $numeric[$j]+1 : 1;
+                            else if (!$isnum && strlen($f[$j]) > 0)
+                                $numeric[$j] = false;
                         }
                     }
                 }
                 $llpos = -1;
                 while( ++$llpos + 1 < $fields ) {
-                    if( isset($numeric[$llpos]) && isset($numeric[$llpos+1]) )
+                    if( isset($numeric[$llpos]) && isset($numeric[$llpos+1]) && $numeric[$llpos] !== false && $numeric[$llpos] > ($i - 1) / 2 && $numeric[$llpos] == $numeric[$llpos+1] )
                         break;
                 }
                 if( $llpos + 1 < $fields && $fields > $maxfields ) {
@@ -170,7 +171,7 @@ class CSVFormat implements Format {
                         if( $length == 0 ) {
                             $emptycount[$j]++;
                         } elseif( $isint && !$isfloat )
-                            $intcount[$j]++;
+                            $integers[$j]++;
                             if( $integers[$j] == 2 )
                                 $integers[$j] = 1;
                         elseif( !$isint && !$isfloat ) {
@@ -241,8 +242,11 @@ class CSVFormat implements Format {
             $cur = $end; // current char that we are testing
             $after_quote = $quotes < 0 ? true : false;
             while( $cur < $len ) {
-                if( $line[$cur] === $delim && $after_quote )
+                if( $line[$cur] === $delim && $after_quote ) {
+                    if ($end == $cur)
+                        $end = $cur-1;
                     break;
+                }
                 if( $line[$cur] === '"' ) {
                     $cur++;
                     if( $line[$cur] === '"' ) {
@@ -259,7 +263,7 @@ class CSVFormat implements Format {
                 }
             }
             // ok, now cut the value
-            $result[] = $start < $len ? substr($line, $start, $end-$start+1) : '';
+            $result[] = $start < $len && $end >= $start ? substr($line, $start, $end-$start+1) : '';
             // next entry (cur points at a delimiter)
             $start = $cur + 1;
             if( $start == $len )

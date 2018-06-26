@@ -2,6 +2,10 @@
 
 Versions are numbered `N.M-S`, where `N.M` is the MapBBCode library version, and `S` is the Share build, independent of the library version. There are no "stable" versions and releases: the latest version is always the one to install.
 
+### 1.2-15, 2018-06-26
+
+* Major update to CSV parsing module, detects more formats now.
+
 ### 1.2-14, 2015-04-06
 
 * Option to remove maps from libraries. [#5](https://github.com/MapBBCode/share.mapbbcode.org/pull/5)

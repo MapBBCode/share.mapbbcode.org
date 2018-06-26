@@ -3,7 +3,7 @@
 class IFrameFormat implements Format {
     public $title = 'Embed';
     public $mime = 'text/html';
-    public $can_attach = false;
+    public $display_only = true;
 
     public function export( $data ) {
         global $scodeid, $base_path;

@@ -3,6 +3,7 @@
 class GeoJSONFormat implements Format {
     public $title = 'GeoJSON';
     public $mime = 'application/json';
+    public $display_only = false;
     
     private $colors = array(
         'blue' => '#0022dd',

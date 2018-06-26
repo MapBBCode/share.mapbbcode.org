@@ -22,9 +22,9 @@ function mapbbcode_stats( $bbcode ) {
         return $cnt;
 
     if( count($m) > 4 ) {
-        $items = $m[4];
-        while( preg_match('/^\\s*(?:;\\s*)?('.$re['mapel'].')/', $items, $itm) ) {
-            $s = $itm[1];
+        $items = explode(';', str_replace(';;', '##%##', $m[4]));
+        foreach( $items as $s ) {
+            $s = str_replace('##%##',';', $s);
             $coords = 0;
             $first;
             $eqfirst = false;
@@ -45,7 +45,6 @@ function mapbbcode_stats( $bbcode ) {
                 $cnt[1]++;
             elseif( $coords > 1 && $eqfirst )
                 $cnt[2]++;
-            $items = substr($items, strlen($itm[0]));
         }
     }
 
