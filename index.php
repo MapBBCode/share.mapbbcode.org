@@ -127,7 +127,7 @@ if( $action == 'initdb' && NEED_INIT_DB ) {
     }
 }
 
-if( isset($_REQUEST['format']) && preg_match('/^[a-z]+$/', $_REQUEST['format']) ) {
+if( isset($_REQUEST['format']) && preg_match('/^[a-z0-9]+$/', $_REQUEST['format']) ) {
     $format = $_REQUEST['format'];
     header('Access-Control-Allow-Origin: *');
     $result = export($format, $title, $bbcode, isset($scodeid) ? $scodeid : '', !isset($_REQUEST['direct']));
